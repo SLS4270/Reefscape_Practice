@@ -93,7 +93,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain<TalonFX, TalonFX, 
                 hasAppliedOperatorPerspective = true;
             });
         }
-        SmartDashboard.putNumber("llTX", LimelightHelpers.getTX("limelight-dfront"));
     }
 
     public void configPathPlanner() {
