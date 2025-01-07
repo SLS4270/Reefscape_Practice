@@ -3,24 +3,33 @@ package frc.robot.subsystems;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.LimelightHelpers;
+import frc.robot.Robot;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
  * subsystem so it can be used in command-based projects easily.
  */
-public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
+public class CommandSwerveDrivetrain extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> implements Subsystem {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -31,20 +40,23 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private final Rotation2d RedAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean hasAppliedOperatorPerspective = false;
+    private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
-    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
-        super(driveTrainConstants, OdometryUpdateFrequency, modules);
+    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants<?, ?, ?>... modules) {
+        super(TalonFX::new, TalonFX::new, CANcoder::new, driveTrainConstants, OdometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        configPathPlanner();
     }
-    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
+    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants<?, ?, ?>... modules) {
         
-        super(driveTrainConstants, modules);
-        this.m_pigeon2.reset();
+        super(TalonFX::new, TalonFX::new, CANcoder::new, driveTrainConstants, modules);
+        this.getPigeon2().reset();
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        configPathPlanner();
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -81,5 +93,32 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 hasAppliedOperatorPerspective = true;
             });
         }
+        SmartDashboard.putNumber("llTX", LimelightHelpers.getTX("limelight-dfront"));
+    }
+
+    public void configPathPlanner() {
+        RobotConfig config;
+        try {
+            config = RobotConfig.fromGUISettings();
+            AutoBuilder.configure(
+                () -> this.getState().Pose, 
+                this::resetPose, 
+                () -> this.getState().Speeds, 
+                (speeds, feedforwards) -> setControl(
+                        m_pathApplyRobotSpeeds.withSpeeds(speeds)
+                            .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                            .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                    ), 
+                new PPHolonomicDriveController(
+                    new PIDConstants(2,0, 0),
+                    new PIDConstants(3, 0, 0)
+                ), 
+                config, 
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red, 
+                this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }
