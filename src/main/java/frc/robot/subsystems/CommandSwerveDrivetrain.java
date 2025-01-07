@@ -25,10 +25,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 
-/**
- * Class that extends the Phoenix SwerveDrivetrain class and implements
- * subsystem so it can be used in command-based projects easily.
- */
+
 public class CommandSwerveDrivetrain extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> implements Subsystem {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
