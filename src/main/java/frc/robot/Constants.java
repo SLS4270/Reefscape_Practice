@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -16,5 +19,23 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+
+  public static final Pose2d[] apriltagPosesXYBlueCoral = {
+    new Pose2d(4.07, 3.31, Rotation2d.fromDegrees(240)),//17
+    new Pose2d(3.66, 4.03, Rotation2d.fromDegrees(180)),//18
+    new Pose2d(4.07, 4.75, Rotation2d.fromDegrees(120)),//19
+    new Pose2d(4.90, 4.75, Rotation2d.fromDegrees(60)),//20
+    new Pose2d(5.32, 4.03, Rotation2d.fromDegrees(0)),//21
+    new Pose2d(4.90, 3.31, Rotation2d.fromDegrees(300))//22
+  };
+
+  public static final Pose2d[] apriltagPosesXYRedCoral = {
+    new Pose2d(13.47, 3.31, Rotation2d.fromDegrees(300)),//6
+    new Pose2d(13.89, 4.03, Rotation2d.fromDegrees(0)),//7
+    new Pose2d(13.47, 4.75, Rotation2d.fromDegrees(60)),//8
+    new Pose2d(12.64, 4.75, Rotation2d.fromDegrees(120)),//9
+    new Pose2d(12.23, 4.03, Rotation2d.fromDegrees(180)),//10
+    new Pose2d(12.64, 3.31, Rotation2d.fromDegrees(240))//11
+  };
   
 }
