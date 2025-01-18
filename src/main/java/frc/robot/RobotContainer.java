@@ -51,8 +51,8 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
-      // private final TankDrive tankDrive = new TankDrive();
-      // private final Roller roller = new Roller();
+      private final TankDrive tankDrive = new TankDrive();
+      private final Roller roller = new Roller();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     drivetrain.configNeutralMode(NeutralModeValue.Brake);
@@ -63,7 +63,7 @@ public class RobotContainer {
         .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
         .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
     ));
-    // tankDrive.setDefaultCommand(new ExampleCommand(tankDrive, m_driverController));
+    tankDrive.setDefaultCommand(new ExampleCommand(tankDrive, m_driverController));
     configureBindings();
 
   }
@@ -97,7 +97,7 @@ public class RobotContainer {
 
     m_driverController.x().onTrue(new InstantCommand(() -> drivetrain.getPigeon2().reset(), drivetrain));
     
-    // m_driverController.rightBumper().onTrue(new RollerCommand(roller, 0.2)).onFalse(new RollerCommand(roller, 0));
+    m_driverController.rightBumper().onTrue(new RollerCommand(roller, 0.2)).onFalse(new RollerCommand(roller, 0));
   }
 
   /**
