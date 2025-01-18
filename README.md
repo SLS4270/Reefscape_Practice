@@ -3,7 +3,7 @@
 
 #  Reefscape Practice
 
-This repository is for the team 4270 Saint Louis to develop newer students into robotics.
+This repository is for team 4270 Saint Louis to develop newer 2025 season students in robotics.
 
 ## Acknowledgements
 
