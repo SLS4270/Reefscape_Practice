@@ -34,11 +34,7 @@ public class ExampleCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-<<<<<<< HEAD
-    m_subsystem.setDrivePower(leftPower, rightPower);
-=======
     m_subsystem.setDrivePower(controller.getLeftY()-controller.getRightX(), controller.getLeftY()+controller.getRightX());
->>>>>>> main
   }
 
   // Called once the command ends or is interrupted.

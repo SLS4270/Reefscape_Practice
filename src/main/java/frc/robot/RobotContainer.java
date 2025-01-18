@@ -6,7 +6,8 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.ExampleCommand;
-
+import frc.robot.commands.RollerCommand;
+import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.TankDrive;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -33,7 +34,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   private final TankDrive tankDrive = new TankDrive();
-
+  private final Roller roller = new Roller();
   // // The robot's subsystems and commands are defined here...
   // public static final double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12VoltsMps desired top speed
   // public static final double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -82,6 +83,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    m_driverController.rightBumper().onTrue(new RollerCommand(roller, 0.2)).onFalse(new RollerCommand(roller, 0));
     // // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     // // new Trigger(m_exampleSubsystem::exampleCondition)
     // //     .onTrue(new ExampleCommand(m_exampleSubsystem));
@@ -100,7 +102,7 @@ public class RobotContainer {
     // .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
 
     // m_driverController.x().onTrue(new InstantCommand(() -> drivetrain.getPigeon2().reset(), drivetrain));
-
+    
   }
 
   /**
