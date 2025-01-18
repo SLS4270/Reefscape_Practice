@@ -1,1 +1,21 @@
-This is the practice WPILib code of Saint Louis School Robotics Team 4270
+
+![Logo](https://i.imgur.com/B0F0SCk.png)
+
+#  Reefscape Practice
+
+This repository is for the team 4270 Saint Louis to develop newer students into robotics.
+
+## Acknowledgements
+
+ - [Saint Louis School](https://www.saintlouishawaii.org)
+ - [WPILib](https://wpilib.org)
+ - [FIRST robotics competition]( https://www.firstinspires.org/robotics/frc)
+
+## Authors
+
+- [@MrBotBoy](https://github.com/MrBotBoy)
+- [@DevColaDavid](https://github.com/DevColaDavid)
+- [@LAUJAU](https://github.com/LAUJAU)
+- [@eggstoast](https://github.com/eggstoast)
+- [@dsgsgragraehre](https://github.com/dsgsgragraehre)
+
