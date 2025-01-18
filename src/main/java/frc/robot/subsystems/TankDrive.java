@@ -16,8 +16,8 @@ public class TankDrive extends SubsystemBase{
     }
 
     public void setDrivePower(double leftSide, double rightSide) {
-        lSparkMax.set(leftSide);
-        rSparkMax.set(rightSide);
+        lSparkMax.set(-leftSide*.5);
+        rSparkMax.set(-rightSide*.5);
     }
     @Override
     public void periodic() {
