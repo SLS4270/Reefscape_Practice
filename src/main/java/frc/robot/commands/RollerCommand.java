@@ -5,24 +5,26 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.TankDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /** An example command that uses an example subsystem. */
-public class ExampleCommand extends Command {
+public class RollerCommand extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final TankDrive m_subsystem;
+  private final Roller m_Roller;
   CommandXboxController controller;
 
+  double RollerPower;
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ExampleCommand(TankDrive subsystem, CommandXboxController controller) {
-    m_subsystem = subsystem;
-    this.controller = controller;
+  public RollerCommand(Roller subsystem, double RollerPower) {
+    m_Roller = subsystem;
+    this.RollerPower = RollerPower;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
   }
@@ -34,11 +36,7 @@ public class ExampleCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-<<<<<<< HEAD
-    m_subsystem.setDrivePower(leftPower, rightPower);
-=======
-    m_subsystem.setDrivePower(controller.getLeftY()-controller.getRightX(), controller.getLeftY()+controller.getRightX());
->>>>>>> main
+    m_Roller.SetRollerPower(RollerPower);
   }
 
   // Called once the command ends or is interrupted.

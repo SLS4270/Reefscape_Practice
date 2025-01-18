@@ -16,6 +16,8 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.lang.ModuleLayer.Controller;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -65,7 +67,7 @@ public class RobotContainer {
     //   )
     // );
     tankDrive.setDefaultCommand(
-      new ExampleCommand(tankDrive, m_driverController.getLeftY() + m_driverController.getRightY(), m_driverController.getLeftY() - m_driverController.getRightY())
+      new ExampleCommand(tankDrive, m_driverController)
     );
     configureBindings();
   }
