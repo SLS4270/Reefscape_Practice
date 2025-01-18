@@ -5,20 +5,25 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.TankDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
 public class ExampleCommand extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final ExampleSubsystem m_subsystem;
+  private final TankDrive m_subsystem;
+  private double leftPower;
+  private double rightPower;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ExampleCommand(ExampleSubsystem subsystem) {
+  public ExampleCommand(TankDrive subsystem, double leftPower, double rightPower) {
     m_subsystem = subsystem;
+    this.leftPower = leftPower;
+    this.rightPower = rightPower;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(subsystem);
   }
