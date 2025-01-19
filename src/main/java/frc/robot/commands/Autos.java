@@ -4,19 +4,16 @@
 
 package frc.robot.commands;
 
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
-public final class Autos {
+public final class Autos extends SequentialCommandGroup{
   /** Example static factory for an autonomous command. */
-  public static Command exampleAuto(ExampleSubsystem subsystem) {
-    return new Command() {
-      
-    };
-  }
 
-  private Autos() {
-    throw new UnsupportedOperationException("This is a utility class!");
+  public Autos(String pathName) {
+    addCommands(RobotContainer.drivetrain.followPath(pathName));
   }
 }
