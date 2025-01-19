@@ -6,8 +6,8 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.SwerveTurn;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.CommandSwerveDrivetrain.RobotCentricDirectionOfCoral;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
@@ -18,8 +18,8 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -34,10 +34,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static final double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12VoltsMps desired top speed
-  public static final double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+  public static final double MaxAngularRate = RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
   /* Setting up bindings for necessary control of the swerve drive platform */
-  private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
+  public static final CommandXboxController joystick = new CommandXboxController(0); // My joystick
   public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain(); // My drivetrain
 
   private static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -57,17 +57,18 @@ public class RobotContainer {
     drivetrain.configNeutralMode(NeutralModeValue.Brake);
     drivetrain.configPathPlanner();
     m_chooser = new SendableChooser<>();
-    m_chooser.setDefaultOption("Test", new Autos("New Auto"));
+    m_chooser.setDefaultOption("Test", new Autos("N"));
     // Configure the trigger bindings
+   
+    configureBindings();
+    
+    SmartDashboard.putData("Auto", m_chooser);
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
     drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
                                                                                        // negative Y (forward)
         .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
         .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
     ));
-    configureBindings();
-    
-
   }
 
   /**
@@ -98,6 +99,8 @@ public class RobotContainer {
     .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
 
     m_driverController.x().onTrue(new InstantCommand(() -> drivetrain.getPigeon2().reset(), drivetrain));
+
+    m_driverController.rightTrigger().whileTrue(new SwerveTurn());
   
   }
 

@@ -56,7 +56,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
-    private double angleToTurnTo = 0.0; 
+    public double angleToTurnTo = 0.0; 
 
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -258,6 +258,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
 
         SmartDashboard.putNumber("turnToWhatAngle", angleToTurnTo);
+        SmartDashboard.putNumber("currentAngle", this.getPigeon2().getYaw().getValueAsDouble());
     }
 
     private void startSimThread() {
@@ -275,10 +276,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
-    public enum RobotCentricDirectionOfCoral {
-        Left,
-        Right
-    }
     public void configPathPlanner() {
         RobotConfig config;
         try {
@@ -288,13 +285,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 this::resetPose, 
                 () -> this.getState().Speeds, 
                 (speeds, feedforwards) -> setControl(
-                        m_pathApplyRobotSpeeds.withSpeeds(speeds)
+                    new SwerveRequest.ApplyRobotSpeeds().withSpeeds(speeds)
                             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
                     ), 
                 new PPHolonomicDriveController(
-                    new PIDConstants(2,0, 0),
-                    new PIDConstants(3, 0, 0)
+                    new PIDConstants(5,0, 0),
+                    new PIDConstants(5, 0, 0)
                 ), 
                 config, 
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red, 
