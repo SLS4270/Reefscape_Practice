@@ -20,6 +20,29 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
+  //intakes
+  public static final int intakeID = 3;
+  public static final int indexerID = 13;
+  public static final int armIntakeID = 23;
+  public static final int ballIntakeID = 33;
+
+  public static final int intakeSensor = 9;
+  public static final int armIntakeSensor = 19;
+
+  //wrists
+  public static final int climbID = 4;
+  public static final int intakeWristID1 = 14;
+  public static final int intakeWristID2 = 24;
+  public static final int rotatorID = 34;
+  public static final int ballWristID = 44;
+
+  public static final int rotatorEncoderPort = 0;
+
+  //elevator
+  public static final int elevatorID1 = 5;
+  public static final int elevatorID2 = 15;
+
+  //apriltag poses
   public static final Pose2d[] apriltagPosesXYBlueCoral = {
     new Pose2d(4.07, 3.31, Rotation2d.fromDegrees(240)),//17
     new Pose2d(3.66, 4.03, Rotation2d.fromDegrees(180)),//18
@@ -37,5 +60,7 @@ public final class Constants {
     new Pose2d(12.23, 4.03, Rotation2d.fromDegrees(180)),//10
     new Pose2d(12.64, 3.31, Rotation2d.fromDegrees(240))//11
   };
+
+
   
 }
