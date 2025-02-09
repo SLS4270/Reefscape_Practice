@@ -16,6 +16,7 @@ public class Rotator extends SubsystemBase {
     public Rotator() {
         rotatorMotor = new TalonFX(Constants.rotatorID);
         rotationSensor = new DutyCycleEncoder(0);
+        rotatorMotor.setPosition(0);
     }
 
     public void runRotatorToPos(double pos) {

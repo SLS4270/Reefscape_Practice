@@ -13,6 +13,6 @@ public class Intake extends SubsystemBase{
     }
 
     public void spinIntake(double power) {
-
+        intake.set(power);
     }
 }

@@ -1,0 +1,21 @@
+{
+    "name": "Crusader",
+    "sourceUrl": "",
+    "rotations": [
+      {"axis": "x", "degrees": 90},
+      {"axis": "z", "degrees": 90}
+    ],
+    "position": [0, 0, 0],
+    "cameras": [
+      {
+        "name": "Right Camera",
+        "rotations": [
+          {"axis": "z", "degrees": -90}
+        ],
+        "position": [0, -0.2, 0.8],
+        "resolution": [1280, 800],
+        "fov": 80
+      }
+    ],
+    "components": []
+  }

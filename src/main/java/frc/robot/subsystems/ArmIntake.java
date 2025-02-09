@@ -19,7 +19,7 @@ public class ArmIntake extends SubsystemBase{
     }
 
     public void spinArmIntake(double power) {
-
+        armIntake.set(power);
     }
 
     @Override

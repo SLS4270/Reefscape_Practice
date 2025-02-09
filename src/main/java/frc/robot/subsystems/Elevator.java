@@ -15,7 +15,7 @@ public class Elevator extends SubsystemBase {
         rElevator = new TalonFX(Constants.elevatorID2);
     }
     
-    public void runElevatorToPos(double pos) {
+    public void runElevatorToPos(double lPos, double rPos) {
 
     }
 
