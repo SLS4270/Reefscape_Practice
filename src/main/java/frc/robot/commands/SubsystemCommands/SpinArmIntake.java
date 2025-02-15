@@ -3,11 +3,11 @@ package frc.robot.commands.SubsystemCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ArmIntake;
 
-public class SpinClawIntake extends Command {
+public class SpinArmIntake extends Command {
     ArmIntake s_ArmIntake;
     double power;
     
-    public SpinClawIntake(ArmIntake subsys, double power) {
+    public SpinArmIntake(ArmIntake subsys, double power) {
         s_ArmIntake = subsys;
         this.power = power;
 

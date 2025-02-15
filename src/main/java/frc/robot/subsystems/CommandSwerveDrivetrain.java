@@ -17,10 +17,13 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -57,6 +60,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     public double angleToTurnTo = 0.0; 
+
+    StructPublisher<Pose2d> publisher;
 
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -119,7 +124,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     );
 
     /* The SysId routine to test */
-    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+    public SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -139,6 +144,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        publisher = NetworkTableInstance.getDefault()
+            .getStructTopic("MyPose", Pose2d.struct).publish();
+        // this.resetPose(new Pose2d(2.6, 4.05, Rotation2d.fromDegrees(0)));
+        LimelightHelpers.setCameraPose_RobotSpace("limelight-front", 0.232, 0, 0.254, 0, 0, 0);
     }
 
     /**
@@ -195,6 +204,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+
     }
 
     /**
@@ -259,6 +270,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         SmartDashboard.putNumber("turnToWhatAngle", angleToTurnTo);
         SmartDashboard.putNumber("currentAngle", this.getPigeon2().getYaw().getValueAsDouble());
+        SmartDashboard.putNumber("LimelightTest", LimelightHelpers.getTX("limelight-front"));
+        updateOdometry();
+        Pose2d pose = new Pose2d(this.getState().Pose.getTranslation(), this.getState().Pose.getRotation());
+        publisher.set(LimelightHelpers.getBotPose2d_wpiBlue("limelight-front"));
     }
 
     private void startSimThread() {
@@ -302,12 +317,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     }
       public static double limelight_side_to_side_proportional(double offset) {    
-        if (LimelightHelpers.getFiducialID("limelight-dfront") > 0) {
+        if (LimelightHelpers.getFiducialID("limelight-front") > 0) {
             double kP = .0078;
     
             // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of 
             // your limelight 3 feed, tx should return roughly 31 degrees.
-            double yVelocity = -(LimelightHelpers.getTX("limelight-dfront") + offset) * kP * RobotContainer.MaxSpeed;
+            double yVelocity = -(LimelightHelpers.getTX("limelight-front") + offset) * kP * RobotContainer.MaxSpeed;
     
     
             return yVelocity;
@@ -317,12 +332,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public static double limelight_forward(double offset) {
-        if (LimelightHelpers.getFiducialID("limelight-dfront") > 0) {
+        if (LimelightHelpers.getFiducialID("limelight-front") > 0) {
             double kP = .0078;
     
             // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of 
             // your limelight 3 feed, tx should return roughly 31 degrees.
-            double xVelocity = -(LimelightHelpers.getTY("limelight-dfront") + offset) * kP * RobotContainer.MaxSpeed;
+            double xVelocity = (LimelightHelpers.getTY("limelight-front") + offset) * kP * RobotContainer.MaxSpeed;
     
     
             return xVelocity;
@@ -338,4 +353,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command followPath(String pathName) {
         return new PathPlannerAuto(pathName);
     }
+
+    public void tareSwerve() {
+        this.getPigeon2().reset();
+    }
+
+
+     public void updateOdometry() {
+            LimelightHelpers.SetRobotOrientation("limelight-front", this.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+            // LimelightHelpers.SetRobotOrientation("limelight-dfront", this.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+            LimelightHelpers.PoseEstimate llPoseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
+            // LimelightHelpers.PoseEstimate llPoseEstimate2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-dfront");
+            SmartDashboard.putNumber("tagCount", llPoseEstimate.tagCount);
+            if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && llPoseEstimate.tagCount > 0) {
+                    this.setVisionMeasurementStdDevs(VecBuilder.fill(0.1, 0.1, 9999999));
+                    this.addVisionMeasurement(llPoseEstimate.pose, llPoseEstimate.timestampSeconds);
+            }
+               
+            // SmartDashboard.putNumber("Apriltag", llPoseEstimate.tagCount);
+            // SmartDashboard.putNumber("Rate", this.getPigeon2().getRate());
+            // SmartDashboard.putNumber("lengthLL", llPoseEstimate.rawFiducials.length);
+            
+            //    System.out.print("hey");
+        }
+    
 }

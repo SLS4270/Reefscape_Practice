@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
@@ -10,12 +11,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class ArmIntake extends SubsystemBase{
-    SparkMax armIntake;
+    TalonFX armIntake;
     CANrange rangeFinder;
+    public static boolean objectInClaw;
 
     public ArmIntake() {
-        armIntake = new SparkMax(Constants.armIntakeID, MotorType.kBrushless);
+        armIntake = new TalonFX(Constants.armIntakeID);
         rangeFinder = new CANrange(40);
+        rangeFinder.getConfigurator().apply(new ProximityParamsConfigs().withProximityThreshold(0.037));
+        objectInClaw = false;
     }
 
     public void spinArmIntake(double power) {
@@ -25,5 +29,6 @@ public class ArmIntake extends SubsystemBase{
     @Override
     public void periodic() {
         SmartDashboard.putNumber("distance", rangeFinder.getDistance().getValueAsDouble());
+        objectInClaw = rangeFinder.getIsDetected().getValue();
     }
 }

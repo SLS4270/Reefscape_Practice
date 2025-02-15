@@ -22,7 +22,7 @@ public class Indexer extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("distance", indexerSensor.getDistance().getValueAsDouble());
+        // SmartDashboard.putNumber("distance", indexerSensor.getDistance().getValueAsDouble());
     }
     
 }

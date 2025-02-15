@@ -12,5 +12,18 @@ public class RunElevator extends Command {
         s_Elevator = subsys;
         this.lPos = lPos;
         this.rPos = rPos;
+
+        addRequirements(subsys);
+    }
+
+    @Override
+    public void initialize() {
+        s_Elevator.runElevatorToPos(lPos, rPos);
+    }
+
+    @Override
+    public boolean isFinished() {
+        // TODO Auto-generated method stub
+        return super.isFinished();
     }
 }

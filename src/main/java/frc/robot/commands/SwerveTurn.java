@@ -11,9 +11,9 @@ public class SwerveTurn extends SequentialCommandGroup{
     
     
 
-    public SwerveTurn () {
+    public SwerveTurn (double angleToTurnTo) {
         SwerveRequest.FieldCentricFacingAngle angle = new SwerveRequest.FieldCentricFacingAngle()
-            .withTargetDirection(Rotation2d.fromDegrees(RobotContainer.drivetrain.angleToTurnTo))
+            .withTargetDirection(Rotation2d.fromDegrees(angleToTurnTo))
             .withRotationalDeadband(RobotContainer.MaxAngularRate * 0.01);
         angle.HeadingController = new PhoenixPIDController(3, 0, 0);
         addCommands(
