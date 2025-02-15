@@ -86,7 +86,7 @@ public class RobotContainer {
     // drivetrain.configNeutralMode(NeutralModeValue.Brake);
     // drivetrain.configPathPlanner();
     m_chooser = new SendableChooser<>();
-    m_chooser.setDefaultOption("Test", new Autos("N"));
+    m_chooser.setDefaultOption("Test", new Autos("AutoTest"));
     // Configure the trigger bindings
    
 
@@ -142,10 +142,10 @@ public class RobotContainer {
     m_driverController.button(4).onTrue(new SpinArmIntake(s_ArmIntake, -1)).onFalse(new SpinArmIntake(s_ArmIntake,0));
     m_driverController.pov(180).onTrue(new InstantCommand(() -> drivetrain.tareSwerve(), drivetrain));
 
-    m_driverController.pov(0).and(m_driverController.x()).whileTrue(drivetrain.m_sysIdRoutineToApply.dynamic(Direction.kReverse));
-    m_driverController.pov(0).and(m_driverController.y()).whileTrue(drivetrain.m_sysIdRoutineToApply.dynamic(Direction.kForward));
-    m_driverController.pov(90).and(m_driverController.x()).whileTrue(drivetrain.m_sysIdRoutineToApply.quasistatic(Direction.kReverse));
-    m_driverController.pov(90).and(m_driverController.y()).whileTrue(drivetrain.m_sysIdRoutineToApply.quasistatic(Direction.kForward));
+    m_driverController.pov(0).and(m_driverController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    m_driverController.pov(0).and(m_driverController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    m_driverController.pov(90).and(m_driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    m_driverController.pov(90).and(m_driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
 
     m_driverController.a().whileTrue(drivetrain.applyRequest(() -> driveRC
     .withVelocityX(-joystick.getLeftY() * MaxSpeed)

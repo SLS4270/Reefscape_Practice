@@ -62,6 +62,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public double angleToTurnTo = 0.0; 
 
     StructPublisher<Pose2d> publisher;
+    Pose2d pose;
 
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -146,8 +147,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         publisher = NetworkTableInstance.getDefault()
             .getStructTopic("MyPose", Pose2d.struct).publish();
-        // this.resetPose(new Pose2d(2.6, 4.05, Rotation2d.fromDegrees(0)));
         LimelightHelpers.setCameraPose_RobotSpace("limelight-front", 0.232, 0, 0.254, 0, 0, 0);
+        configPathPlanner();
     }
 
     /**
@@ -272,8 +273,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SmartDashboard.putNumber("currentAngle", this.getPigeon2().getYaw().getValueAsDouble());
         SmartDashboard.putNumber("LimelightTest", LimelightHelpers.getTX("limelight-front"));
         updateOdometry();
-        Pose2d pose = new Pose2d(this.getState().Pose.getTranslation(), this.getState().Pose.getRotation());
-        publisher.set(LimelightHelpers.getBotPose2d_wpiBlue("limelight-front"));
+        pose = new Pose2d(this.getState().Pose.getTranslation(), this.getState().Pose.getRotation());
+        publisher.set(pose);
+    }
+
+    public void updateOdometry() {
+        LimelightHelpers.SetRobotOrientation("limelight-front", this.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        // LimelightHelpers.SetRobotOrientation("limelight-dfront", this.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.PoseEstimate llPoseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
+        // LimelightHelpers.PoseEstimate llPoseEstimate2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-dfront");
+        SmartDashboard.putNumber("tagCount", llPoseEstimate.tagCount);
+        SmartDashboard.putNumber("AngularVelo", this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble());
+        if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && llPoseEstimate.tagCount > 0) {
+                this.setVisionMeasurementStdDevs(VecBuilder.fill(0.1, 0.1, 9999999));
+                this.addVisionMeasurement(llPoseEstimate.pose, llPoseEstimate.timestampSeconds);
+        }
     }
 
     private void startSimThread() {
@@ -357,24 +371,5 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void tareSwerve() {
         this.getPigeon2().reset();
     }
-
-
-     public void updateOdometry() {
-            LimelightHelpers.SetRobotOrientation("limelight-front", this.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-            // LimelightHelpers.SetRobotOrientation("limelight-dfront", this.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-            LimelightHelpers.PoseEstimate llPoseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
-            // LimelightHelpers.PoseEstimate llPoseEstimate2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-dfront");
-            SmartDashboard.putNumber("tagCount", llPoseEstimate.tagCount);
-            if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && llPoseEstimate.tagCount > 0) {
-                    this.setVisionMeasurementStdDevs(VecBuilder.fill(0.1, 0.1, 9999999));
-                    this.addVisionMeasurement(llPoseEstimate.pose, llPoseEstimate.timestampSeconds);
-            }
-               
-            // SmartDashboard.putNumber("Apriltag", llPoseEstimate.tagCount);
-            // SmartDashboard.putNumber("Rate", this.getPigeon2().getRate());
-            // SmartDashboard.putNumber("lengthLL", llPoseEstimate.rawFiducials.length);
-            
-            //    System.out.print("hey");
-        }
     
 }

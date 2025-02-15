@@ -25,7 +25,7 @@ public class Rotator extends SubsystemBase {
     public Rotator() {
         var config = new TalonFXConfiguration();
         rotatorMotor = new TalonFX(Constants.rotatorID);
-        rotatorMotor.setNeutralMode(NeutralModeValue.Coast);
+        rotatorMotor.setNeutralMode(NeutralModeValue.Brake);
         rotationSensor = new DutyCycleEncoder(9);
         // rotatorMotor.setPosition(0);
         rotatorMotor.getConfigurator().apply(config.MotionMagic
