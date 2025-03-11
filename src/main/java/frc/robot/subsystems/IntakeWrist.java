@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
@@ -25,6 +26,11 @@ public class IntakeWrist extends SubsystemBase{
             .withMotionMagicExpo_kV(0.00001)
             .withMotionMagicExpo_kA(0.00001));
         wristIntake1.getConfigurator().apply(new Slot0Configs().withKP(1));
+        wristIntake1.getConfigurator().apply(new CurrentLimitsConfigs()
+        .withStatorCurrentLimit(60)
+        .withStatorCurrentLimitEnable(true)
+        .withSupplyCurrentLimit(60)
+        .withSupplyCurrentLimitEnable(true));
 
         wristIntake2.setNeutralMode(NeutralModeValue.Brake);
         wristIntake2.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
@@ -45,6 +51,15 @@ public class IntakeWrist extends SubsystemBase{
         SmartDashboard.putNumber("rPositionWrist", wristIntake2.getPosition().getValueAsDouble());
     }
 
+    public double getLPos() {
+        return wristIntake1.getPosition().getValueAsDouble();
+    }
+
+    public double getRPos() {
+        return wristIntake2.getPosition().getValueAsDouble();
+    }
+
     //stow: L: -3.3 R: 3.8
     //intake L: -31.8 R: 32.5
+    //-22.77
 }

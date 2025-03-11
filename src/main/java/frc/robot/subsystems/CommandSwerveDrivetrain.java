@@ -11,13 +11,19 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindThenFollowPath;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -59,10 +65,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
-    public double angleToTurnTo = 0.0; 
+    public double angleToTurnTo;
 
     StructPublisher<Pose2d> publisher;
     Pose2d pose;
+    SwerveDrivePoseEstimator poseEstimator;
+    public boolean hasTargets;
 
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -147,8 +155,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         publisher = NetworkTableInstance.getDefault()
             .getStructTopic("MyPose", Pose2d.struct).publish();
-        LimelightHelpers.setCameraPose_RobotSpace("limelight-front", 0.232, 0, 0.254, 0, 0, 0);
-        configPathPlanner();
+        LimelightHelpers.setCameraPose_RobotSpace("limelight-front", 0.234, 0.02, 0.254, 0, 0, 21.45);
+        LimelightHelpers.setCameraPose_RobotSpace("limelight", 0.234, -0.02, 0.254, 0, 0, -21.45);
+        poseEstimator = new SwerveDrivePoseEstimator(getKinematics(), this.getPigeon2().getRotation2d(), this.getState().ModulePositions, new Pose2d());
+        angleToTurnTo = 0.0;
     }
 
     /**
@@ -261,33 +271,43 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
+        if (LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").tagCount > 0 || LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").tagCount > 0)  {
+            hasTargets = true;
+        } else {
+            hasTargets = false;
+        }
+
         if (DriverStation.getAlliance().isPresent()) {
             if (DriverStation.getAlliance().get() == Alliance.Blue) {
-                angleToTurnTo = (findClosestApriltag(Constants.apriltagPosesXYBlueCoral).getRotation().getDegrees() + 180.0) % 180;
+                angleToTurnTo = findClosestApriltag(Constants.apriltagPosesXYBlueCoral).getRotation().getDegrees() - 180;
             } else {
                 angleToTurnTo = (findClosestApriltag(Constants.apriltagPosesXYRedCoral).getRotation().getDegrees() + 180.0) % 180;
             }
         }
+        // angleToTurnTo = (findClosestApriltag(Constants.apriltagPosesXYBlueCoral).getRotation().getDegrees() + 180.0) % 180;
+
 
         SmartDashboard.putNumber("turnToWhatAngle", angleToTurnTo);
         SmartDashboard.putNumber("currentAngle", this.getPigeon2().getYaw().getValueAsDouble());
         SmartDashboard.putNumber("LimelightTest", LimelightHelpers.getTX("limelight-front"));
         updateOdometry();
-        pose = new Pose2d(this.getState().Pose.getTranslation(), this.getState().Pose.getRotation());
-        publisher.set(pose);
+        // pose = new Pose2d(this.getState().Pose.getTranslation(), this.getState().Pose.getRotation());
+        publisher.set(poseEstimator.getEstimatedPosition());
     }
 
     public void updateOdometry() {
-        LimelightHelpers.SetRobotOrientation("limelight-front", this.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        // LimelightHelpers.SetRobotOrientation("limelight-dfront", this.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate llPoseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
-        // LimelightHelpers.PoseEstimate llPoseEstimate2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-dfront");
-        SmartDashboard.putNumber("tagCount", llPoseEstimate.tagCount);
-        SmartDashboard.putNumber("AngularVelo", this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble());
-        if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && llPoseEstimate.tagCount > 0) {
-                this.setVisionMeasurementStdDevs(VecBuilder.fill(0.1, 0.1, 9999999));
-                this.addVisionMeasurement(llPoseEstimate.pose, llPoseEstimate.timestampSeconds);
-        }
+        poseEstimator.update(this.getPigeon2().getRotation2d(), this.getState().ModulePositions);
+        LimelightHelpers.SetRobotOrientation("limelight-front", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").tagCount > 0) {
+            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.9, 0.9, 9999999));
+            poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").pose, 
+                                          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").timestampSeconds);
+        } 
+        // else if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").tagCount > 0) {
+        //     poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(1, 1, 9999999));
+        //     poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").pose, 
+        //                               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").timestampSeconds);
+        // }
     }
 
     private void startSimThread() {
@@ -310,8 +330,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         try {
             config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
-                () -> this.getState().Pose, 
-                this::resetPose, 
+                () -> poseEstimator.getEstimatedPosition(), 
+                this.poseEstimator::resetPose, 
                 () -> this.getState().Speeds, 
                 (speeds, feedforwards) -> setControl(
                     new SwerveRequest.ApplyRobotSpeeds().withSpeeds(speeds)
@@ -319,8 +339,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
                     ), 
                 new PPHolonomicDriveController(
-                    new PIDConstants(5,0, 0),
-                    new PIDConstants(5, 0, 0)
+                    new PIDConstants(3.5, 0, 0),
+                    new PIDConstants(3.5, 0, 0)
                 ), 
                 config, 
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red, 
@@ -330,13 +350,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
 
     }
-      public static double limelight_side_to_side_proportional(double offset) {    
-        if (LimelightHelpers.getFiducialID("limelight-front") > 0) {
-            double kP = .0078;
+      public static double limelight_side_to_side_proportional(double offset, String limelightName) {    
+        if (LimelightHelpers.getFiducialID(limelightName) > 0) {
+            double kP = .005;
     
             // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of 
             // your limelight 3 feed, tx should return roughly 31 degrees.
-            double yVelocity = -(LimelightHelpers.getTX("limelight-front") + offset) * kP * RobotContainer.MaxSpeed;
+            double yVelocity = -(LimelightHelpers.getTX(limelightName) + offset) * kP * RobotContainer.MaxSpeed;
     
     
             return yVelocity;
@@ -361,7 +381,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public Pose2d findClosestApriltag(Pose2d[] apriltagPoses) {
-        return this.getState().Pose.nearest(Arrays.asList(apriltagPoses));
+        return poseEstimator.getEstimatedPosition().nearest(Arrays.asList(apriltagPoses));
     }
 
     public Command followPath(String pathName) {
@@ -369,7 +389,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void tareSwerve() {
-        this.getPigeon2().reset();
+        this.getPigeon2().setYaw(0);
     }
-    
+
+    public void tareSwerve(double angle) {
+        this.getPigeon2().setYaw(angle);
+    }
+
+    public Pose2d getPoseEstimate() {
+        return poseEstimator.getEstimatedPosition();
+    }
+
+    public Command teleopPathfollowing(Pose2d[] apriltagPoses) {
+        PathPlannerPath path = new PathPlannerPath(
+            PathPlannerPath.waypointsFromPoses(
+                    new Pose2d(poseEstimator.getEstimatedPosition().getX(),
+                                poseEstimator.getEstimatedPosition().getY(),
+                                Rotation2d.fromDegrees(poseEstimator.getEstimatedPosition().getRotation().getDegrees() - 180)),
+                    poseEstimator.getEstimatedPosition().nearest(Arrays.asList(apriltagPoses))
+                ), 
+            new PathConstraints(4.0, 4.0, 3.0 * Math.PI, 4.0 * Math.PI), 
+            null, 
+            new GoalEndState(0.0, Rotation2d.fromDegrees(poseEstimator.getEstimatedPosition().nearest(Arrays.asList(apriltagPoses)).getRotation().getDegrees() - 180)));
+        return AutoBuilder.pathfindThenFollowPath(path, new PathConstraints(4.0, 4.0, 3.0 * Math.PI, 4.0 * Math.PI));
+    }
 }

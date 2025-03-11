@@ -10,12 +10,9 @@ import frc.robot.commands.SetState;
 import frc.robot.commands.SwerveTurn;
 import frc.robot.commands.SetState.States;
 import frc.robot.commands.StateCommands.CoralLevels;
-import frc.robot.commands.SubsystemCommands.RunIntakeWrist;
-import frc.robot.commands.SubsystemCommands.RunRotator;
 import frc.robot.commands.SubsystemCommands.SpinArmIntake;
 import frc.robot.commands.SubsystemCommands.SpinClimb;
-import frc.robot.commands.SubsystemCommands.SetClimbPos;
-import frc.robot.commands.SubsystemCommands.SpinIntake;
+import frc.robot.commands.SwerveTurn.Side;
 import frc.robot.subsystems.ArmIntake;
 import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -26,6 +23,7 @@ import frc.robot.subsystems.IntakeWrist;
 import frc.robot.subsystems.Rotator;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -41,7 +39,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -74,7 +71,7 @@ public class RobotContainer {
                                                                // driving in open loop
 
   public static final SwerveRequest.RobotCentric driveRC = new SwerveRequest.RobotCentric()
-      .withDeadband(MaxSpeed * 0.02).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+      .withDeadband(MaxSpeed * 0.02).withRotationalDeadband(MaxAngularRate * 0.02) // Add a 10% deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -84,13 +81,23 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // drivetrain.configNeutralMode(NeutralModeValue.Brake);
-    // drivetrain.configPathPlanner();
+    drivetrain.configPathPlanner();
+    NamedCommands.registerCommand("PrepScoreL4", new SetState(States.PrepScoreL4));
+    NamedCommands.registerCommand("SpinIndexer", new SetState(States.Indexing));
+    NamedCommands.registerCommand("Intake", new SetState(States.Intaking));
+    NamedCommands.registerCommand("Outtake", new SpinArmIntake(s_ArmIntake, -1));
+    NamedCommands.registerCommand("ScoreL4", new SetState(States.ScoringL4));
+    NamedCommands.registerCommand("A1 Prep", new SetState(States.AlgaeLow));
+    NamedCommands.registerCommand("A2 Prep", new SetState(States.AlgaeHigh));
+    NamedCommands.registerCommand("AlgaeIntake", new SpinArmIntake(s_ArmIntake, 0.25));
+    NamedCommands.registerCommand("ClawStop", new SpinArmIntake(s_ArmIntake, 0));
+    NamedCommands.registerCommand("BargePrep", new SetState(States.BackwardBarge));
+    NamedCommands.registerCommand("ArmReturn", new SetState(States.Default));
     m_chooser = new SendableChooser<>();
-    m_chooser.setDefaultOption("Test", new Autos("AutoTest"));
-    // Configure the trigger bindings
-   
+    m_chooser.setDefaultOption("2.5", new Autos("2.5"));
+    m_chooser.addOption("L4 + 2 Algae", new Autos("L4 + Alagae"));
+    m_chooser.addOption("Push", new Autos("PUSH"));
 
-    
     SmartDashboard.putData("Auto", m_chooser);
     drivetrain.configNeutralMode(NeutralModeValue.Brake);
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
@@ -112,65 +119,66 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    Trigger objectInClaw = new Trigger(() -> ArmIntake.objectInClaw);
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    // new Trigger(m_exampleSubsystem::exampleCondition)
-    //     .onTrue(new ExampleCommand(m_exampleSubsystem));
 
-    // // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // // cancelling on release.
-    // m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-
-    // m_driverController.leftBumper().whileTrue(drivetrain.applyRequest(() -> driveRC
-    // .withVelocityX(CommandSwerveDrivetrain.limelight_forward(0))
-    // .withVelocityY(CommandSwerveDrivetrain.limelight_side_to_side_proportional(-20))
-    // .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
-
-    // m_driverController.rightBumper().whileTrue(drivetrain.applyRequest(() -> driveRC
-    // .withVelocityX(CommandSwerveDrivetrain.limelight_forward(0))
-    // .withVelocityY(CommandSwerveDrivetrain.limelight_side_to_side_proportional(20))
-    // .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
-
-    // m_driverController.x().onTrue(new InstantCommand(() -> drivetrain.getPigeon2().reset(), drivetrain));
-
-    m_driverController.leftBumper().and(() -> Elevator.elevatorLevel == CoralLevels.L4).onTrue(new SetState(States.ScoringL4)).onFalse(new SetState(States.Default));
-    m_driverController.leftBumper().and(() -> Elevator.elevatorLevel == CoralLevels.L3).onTrue(new SetState(States.ScoringL3)).onFalse(new SetState(States.Default));
-    m_driverController.leftBumper().and(() -> Elevator.elevatorLevel == CoralLevels.L2).onTrue(new SetState(States.ScoringL2)).onFalse(new SetState(States.Return));
-    m_driverController.leftBumper().and(() -> Elevator.elevatorLevel == CoralLevels.L1).onTrue(new SetState(States.ScoringL1)).onFalse(new SetState(States.Return));
+    m_driverController.rightTrigger().and(() -> Elevator.elevatorLevel == CoralLevels.L4).onTrue(new SetState(States.ScoringL4)).onFalse(new SetState(States.Default));
+    m_driverController.rightTrigger().and(() -> Elevator.elevatorLevel == CoralLevels.L3).onTrue(new SetState(States.ScoringL3)).onFalse(new SetState(States.Default));
+    m_driverController.rightTrigger().and(() -> Elevator.elevatorLevel == CoralLevels.L2).onTrue(new SetState(States.ScoringL2)).onFalse(new SetState(States.Return));
+    m_driverController.rightTrigger().and(() -> Elevator.elevatorLevel == CoralLevels.L1).onTrue(new SetState(States.ScoringL1)).onFalse(new SetState(States.Return));
     m_driverController.leftTrigger().onTrue(new SetState(States.Intaking)).onFalse(new SetState(States.Indexing));
-    m_driverController.button(3).onTrue(new SpinArmIntake(s_ArmIntake, 0.5)).onFalse(new SpinArmIntake(s_ArmIntake, 0.15));
+    m_driverController.rightBumper().onTrue(new SetState(States.Outtaking)).onFalse(new SetState(States.Default));
+
+    m_driverController.button(3).onTrue(new SpinArmIntake(s_ArmIntake, 0.5)).onFalse(new SpinArmIntake(s_ArmIntake, 0.33));
     m_driverController.button(4).onTrue(new SpinArmIntake(s_ArmIntake, -1)).onFalse(new SpinArmIntake(s_ArmIntake,0));
+    // m_driverController.pov(180).and(() -> DriverStation.getAlliance().get() == Alliance.Red).onTrue(new InstantCommand(() -> drivetrain.tareSwerve(), drivetrain));
     m_driverController.pov(180).onTrue(new InstantCommand(() -> drivetrain.tareSwerve(), drivetrain));
 
-    m_driverController.pov(0).and(m_driverController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-    m_driverController.pov(0).and(m_driverController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-    m_driverController.pov(90).and(m_driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-    m_driverController.pov(90).and(m_driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    // m_driverController.pov(0).and(m_driverController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    // m_driverController.pov(0).and(m_driverController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    // m_driverController.pov(90).and(m_driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    // m_driverController.pov(90).and(m_driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
 
-    m_driverController.a().whileTrue(drivetrain.applyRequest(() -> driveRC
-    .withVelocityX(-joystick.getLeftY() * MaxSpeed)
-    .withVelocityY(CommandSwerveDrivetrain.limelight_side_to_side_proportional(-15))
-    .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
+    // m_driverController.a().whileTrue(drivetrain.applyRequest(() -> driveRC
+    // .withVelocityX(CommandSwerveDrivetrain.limelight_forward(7.6))
+    // .withVelocityY(CommandSwerveDrivetrain.limelight_side_to_side_proportional(3.5, "limelight"))
+    // .withRotationalRate(0)));
+
+    m_driverController.a().whileTrue(new SwerveTurn());
 
     m_driverController.b().whileTrue(drivetrain.applyRequest(() -> driveRC
-    .withVelocityX(-joystick.getLeftY() * MaxSpeed)
-    .withVelocityY(CommandSwerveDrivetrain.limelight_side_to_side_proportional(15))
-    .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
+    .withVelocityX(-joystick.getLeftY() * MaxSpeed * 0.5)
+    .withVelocityY(-joystick.getLeftX() * MaxSpeed * 0.5)
+    .withRotationalRate(-joystick.getRightX() * MaxAngularRate * 0.5)));
 
-    buttons.button(1).onTrue(new SetState(States.PrepScoreL1));
-    buttons.button(2).onTrue(new SetState(States.PrepScoreL2));
-    buttons.button(3).onTrue(new SetState(States.PrepScoreL3));
-    buttons.button(4).onTrue(new SetState(States.PrepScoreL4));
-    buttons.button(5).onTrue(new SetState(States.AlgaeLow));
-    buttons.button(6).onTrue(new SetState(States.AlgaeHigh));
-    buttons.button(7).onTrue(new SpinClimb(s_Climb, 0.75)).onFalse(new SpinClimb(s_Climb, 0));
-    buttons.button(8).onTrue(new SetState(States.Default));
-    buttons.button(9).onTrue(new SetState(States.BargeScore));
-    buttons.button(10).onTrue(new SpinClimb(s_Climb, -0.75)).onFalse(new SpinClimb(s_Climb, 0));
-    buttons.button(11).onTrue(new SetState(States.Climbing));
-    buttons.button(12).onFalse(new SetClimbPos(s_Climb, 0));
+    // m_driverController.leftBumper().and(() -> drivetrain.angleToTurnTo <= 1.0).and(() -> drivetrain.angleToTurnTo >= -1.0).whileTrue(new SwerveTurn(0, Side.Left));
+    // m_driverController.leftBumper().and(() -> drivetrain.angleToTurnTo <= -119.0).and(() -> drivetrain.angleToTurnTo >= -121.0).whileTrue(new SwerveTurn(-120, Side.Left));
+    // m_driverController.leftBumper().and(() -> drivetrain.angleToTurnTo <= 61.0).and(() -> drivetrain.angleToTurnTo >= 59.0).whileTrue(new SwerveTurn(60, Side.Left));
+    // m_driverController.leftBumper().and(() -> drivetrain.angleToTurnTo <= 121.0).and(() -> drivetrain.angleToTurnTo >= 119.0).whileTrue(new SwerveTurn(120, Side.Left));
+    // m_driverController.leftBumper().and(() -> drivetrain.angleToTurnTo <= -179.0).and(() -> drivetrain.angleToTurnTo >= -181.0).whileTrue(new SwerveTurn(179, Side.Left));
+    // m_driverController.leftBumper().and(() -> drivetrain.angleToTurnTo <= -59.0).and(() -> drivetrain.angleToTurnTo >= -61.0).whileTrue(new SwerveTurn(-60, Side.Left));
 
-    objectInClaw.onTrue(new SpinArmIntake(s_ArmIntake, 0.15));
+    // m_driverController.b().and(() -> drivetrain.angleToTurnTo == 0.0).whileTrue(new SwerveTurn(0, Side.Right));
+    // m_driverController.b().and(() -> drivetrain.angleToTurnTo == 60.0).whileTrue(new SwerveTurn(60, Side.Right));
+    // m_driverController.b().and(() -> drivetrain.angleToTurnTo == 120.0).whileTrue(new SwerveTurn(120, Side.Right));
+    // m_driverController.b().and(() -> drivetrain.angleToTurnTo == -180.0).whileTrue(new SwerveTurn(179, Side.Right));
+    // m_driverController.b().and(() -> drivetrain.angleToTurnTo == -60.0).whileTrue(new SwerveTurn(-60, Side.Right));
+    // m_driverController.b().and(() -> drivetrain.angleToTurnTo == -120.0).whileTrue(new SwerveTurn(-120, Side.Right));
+
+    buttons.button(12).onTrue(new SetState(States.PrepScoreL1));
+    buttons.button(11).onTrue(new SetState(States.PrepScoreL2));
+    buttons.button(2).onTrue(new SetState(States.PrepScoreL3));
+    buttons.button(1).onTrue(new SetState(States.PrepScoreL4));
+
+    buttons.button(10).onTrue(new SetState(States.Default));
+    buttons.button(9).onTrue(new SetState(States.AlgaeLow));
+    buttons.button(8).onTrue(new SetState(States.AlgaeHigh));
+
+    buttons.button(6).onFalse(new SetState(States.Processor));
+    buttons.button(7).onTrue(new SetState(States.BargeScore));
+
+    buttons.button(3).onTrue(new SetState(States.Climbing));
+    buttons.button(5).onTrue(new SpinClimb(s_Climb, 1)).onFalse(new SpinClimb(s_Climb, 0));
+    buttons.button(4).onTrue(new SpinClimb(s_Climb, -1)).onFalse(new SpinClimb(s_Climb, 0));
+
 
     // m_driverController.leftBumper().onTrue(new SpinIntake(s_Intake, -1)).onFalse(new SpinIntake(s_Intake, 0));
     // m_driverController.leftBumper().onTrue(new RunRotator(s_Rotator, 26)).onFalse(new RunRotator(s_Rotator, 0.4));

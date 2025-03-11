@@ -20,4 +20,9 @@ public class RunRotator extends Command {
     public void initialize() {
         s_Rotator.runRotatorToPos(pos, maxVelo);
     }
+
+    @Override
+    public boolean isFinished() {
+        return Math.abs(s_Rotator.getPos() - pos) < 0.03;
+    }
 }

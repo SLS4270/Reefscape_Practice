@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -17,6 +18,11 @@ public class ArmIntake extends SubsystemBase{
 
     public ArmIntake() {
         armIntake = new TalonFX(Constants.armIntakeID);
+        armIntake.getConfigurator().apply(new CurrentLimitsConfigs()
+        .withStatorCurrentLimit(60)
+        .withStatorCurrentLimitEnable(true)
+        .withSupplyCurrentLimit(60)
+        .withSupplyCurrentLimitEnable(true));
         rangeFinder = new CANrange(40);
         rangeFinder.getConfigurator().apply(new ProximityParamsConfigs().withProximityThreshold(0.037));
         objectInClaw = false;

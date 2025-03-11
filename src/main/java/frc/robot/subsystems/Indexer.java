@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -13,6 +14,11 @@ public class Indexer extends SubsystemBase {
 
     public Indexer() {
         indexer = new TalonFX(Constants.indexerID);
+        indexer.getConfigurator().apply(new CurrentLimitsConfigs()
+        .withStatorCurrentLimit(60)
+        .withStatorCurrentLimitEnable(true)
+        .withSupplyCurrentLimit(60)
+        .withSupplyCurrentLimitEnable(true));
         indexerSensor = new CANrange(0);
     }
 

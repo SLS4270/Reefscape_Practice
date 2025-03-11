@@ -7,6 +7,10 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.Autos;
+import frc.robot.commands.SubsystemCommands.SpinArmIntake;
+import frc.robot.subsystems.ArmIntake;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -77,6 +81,13 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    RobotContainer.drivetrain.tareSwerve(Autos.tareAngle);
+
+    // Trigger objectInClaw = new Trigger(() -> ArmIntake.objectInClaw);
+    // objectInClaw.onTrue(new SpinArmIntake(RobotContainer.s_ArmIntake, 0.15));
+    // Trigger hasTargets = new Trigger(() -> RobotContainer.drivetrain.hasTargets);
+    // hasTargets.onFalse(RobotContainer.drivetrain.getDefaultCommand());
   }
 
   /** This function is called periodically during operator control. */

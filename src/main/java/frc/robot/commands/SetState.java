@@ -24,7 +24,12 @@ public class SetState extends SequentialCommandGroup {
         Return,
         AlgaeHigh,
         AlgaeLow,
-        BargeScore
+        BargeScore,
+        Processor,
+        GroundAlgae,
+        ScoreGroundAlgae,
+        GroundAlgaeIntake,
+        BackwardBarge
     }
 
     public SetState (States state) {
@@ -40,6 +45,9 @@ public class SetState extends SequentialCommandGroup {
                 );
                 break;
             case Outtaking:
+                addCommands(
+                    StateCommands.outtakeState()
+                );
                 break;
             case PrepScoreL1:
                 addCommands(
@@ -63,13 +71,7 @@ public class SetState extends SequentialCommandGroup {
                 break;
             case ScoringL4:
                 addCommands(
-                    // new SequentialCommandGroup(
-                    //     new ParallelRaceGroup(
-                    //         new WaitCommand(1.5),
-                            StateCommands.scoringState(CoralLevels.L4)
-                    //     ),
-                    //     StateCommands.defaultState()
-                    // )
+                    StateCommands.scoringState(CoralLevels.L4)
                 );
                 break;
             case ScoringL3:
@@ -116,6 +118,31 @@ public class SetState extends SequentialCommandGroup {
             case BargeScore:
                 addCommands(
                     StateCommands.bargeScore()
+                );
+                break;
+            case Processor:
+                addCommands(
+                    StateCommands.processorState()
+                );
+                break;
+            case GroundAlgae:
+                addCommands(
+                    StateCommands.algaeGround()
+                );
+                break;
+            case ScoreGroundAlgae:
+                addCommands(
+                    StateCommands.releaseAlgaeGround()
+                );
+                break;
+            case GroundAlgaeIntake:
+                addCommands(
+                    StateCommands.intakeGroundAlgae()
+                );
+                break;
+            case BackwardBarge:
+                addCommands(
+                    StateCommands.backwardBargeState()
                 );
                 break;
         }

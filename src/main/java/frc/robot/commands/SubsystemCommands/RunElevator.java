@@ -23,7 +23,6 @@ public class RunElevator extends Command {
 
     @Override
     public boolean isFinished() {
-        // TODO Auto-generated method stub
-        return super.isFinished();
+        return (Math.abs(s_Elevator.getLPos() - lPos) < 5) || (Math.abs(s_Elevator.getRPos() - rPos) < 5);
     }
 }

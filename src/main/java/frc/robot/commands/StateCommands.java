@@ -11,16 +11,12 @@ import frc.robot.RobotContainer;
 import frc.robot.commands.SubsystemCommands.RunElevator;
 import frc.robot.commands.SubsystemCommands.RunIntakeWrist;
 import frc.robot.commands.SubsystemCommands.RunRotator;
-import frc.robot.commands.SubsystemCommands.SetClimbPos;
 import frc.robot.commands.SubsystemCommands.SpinArmIntake;
 import frc.robot.commands.SubsystemCommands.SpinIndexer;
 import frc.robot.commands.SubsystemCommands.SpinIntake;
-import frc.robot.subsystems.ArmIntake;
 import frc.robot.subsystems.Elevator;
 
 public class StateCommands {
-
-    // private static CoralLevels currentLevel = CoralLevels.L3;
 
     public enum CoralLevels {
         L1,
@@ -31,26 +27,26 @@ public class StateCommands {
     
     public static Command defaultState() {
         return new SequentialCommandGroup(
-            new ParallelRaceGroup(
+            new ParallelDeadlineGroup(
+                new WaitCommand(0.3),
                 new RunIntakeWrist(RobotContainer.s_IntakeWrist, -3.3, 3.8),
                 new SpinIntake(RobotContainer.s_Intake, 0),
                 new SpinIndexer(RobotContainer.s_Indexer, 0),
-                new SpinArmIntake(RobotContainer.s_ArmIntake, 0.15),
-                new RunElevator(RobotContainer.s_Elevator, -2.0, 2.3),
-                new WaitCommand(0.1)
+                new SpinArmIntake(RobotContainer.s_ArmIntake, 0.03),
+                new RunElevator(RobotContainer.s_Elevator, -2.0, 4.2)
             ),
-            new RunRotator(RobotContainer.s_Rotator, 0.855,200)//25
+            new RunRotator(RobotContainer.s_Rotator, 0.615,1.5)//25
         );
     }
 
     public static Command intakingState() {
         return new ParallelCommandGroup(
-            new RunIntakeWrist(RobotContainer.s_IntakeWrist, -31.8, 32.5),
+            new RunIntakeWrist(RobotContainer.s_IntakeWrist, -31.95, 32.5),
             new SpinIntake(RobotContainer.s_Intake, -1),
             new SpinIndexer(RobotContainer.s_Indexer, 0.5),
             new SpinArmIntake(RobotContainer.s_ArmIntake, 1),
-            new RunRotator(RobotContainer.s_Rotator, 0.35, 200),//0
-            new RunElevator(RobotContainer.s_Elevator, 0, 0)
+            new RunRotator(RobotContainer.s_Rotator, 0.11, 200),//0
+            new RunElevator(RobotContainer.s_Elevator, 0, 1.3)
         );
     }
 
@@ -60,7 +56,7 @@ public class StateCommands {
                 new WaitCommand(1), 
                 new SpinIndexer(RobotContainer.s_Indexer, -1),
                 new SpinArmIntake(RobotContainer.s_ArmIntake, 1),
-                new SpinIntake(RobotContainer.s_Intake, -0.75),
+                new SpinIntake(RobotContainer.s_Intake, -1),
                 new RunIntakeWrist(RobotContainer.s_IntakeWrist, -3.3, 3.8)
             ),
             defaultState()
@@ -75,19 +71,19 @@ public class StateCommands {
                     new ParallelRaceGroup(
                         new WaitCommand(0.1),
                         new RunElevator(RobotContainer.s_Elevator, 0, 0),
-                        new SpinArmIntake(RobotContainer.s_ArmIntake, 0)                 
+                        new SpinArmIntake(RobotContainer.s_ArmIntake, 0)            
                     ),
-                    new RunRotator(RobotContainer.s_Rotator, 0.69, 200)//17
+                    new RunRotator(RobotContainer.s_Rotator, 0.42, 2)//17
                 );
             case L3:
                 return new SequentialCommandGroup(
                     new InstantCommand(() -> Elevator.setCurrentLevel(level), RobotContainer.s_Elevator),
                     new ParallelRaceGroup(
                         new WaitCommand(0.3),
-                        new RunElevator(RobotContainer.s_Elevator, -21.3, 20.6),
-                        new SpinArmIntake(RobotContainer.s_ArmIntake, 0)                
+                        new RunElevator(RobotContainer.s_Elevator, -21.3, 18.16),
+                        new SpinArmIntake(RobotContainer.s_ArmIntake, 0)             
                     ),
-                    new RunRotator(RobotContainer.s_Rotator, 0.71, 200)//18
+                    new RunRotator(RobotContainer.s_Rotator, 0.47, 2)//18
                 );
             case L4:
                 return new SequentialCommandGroup(
@@ -95,9 +91,9 @@ public class StateCommands {
                     new ParallelRaceGroup(
                         new WaitCommand(0.5),
                         new RunElevator(RobotContainer.s_Elevator, -53.6, 52.8),
-                        new SpinArmIntake(RobotContainer.s_ArmIntake, 0)              
+                        new SpinArmIntake(RobotContainer.s_ArmIntake, 0)           
                     ),
-                    new RunRotator(RobotContainer.s_Rotator, 0.748, 200)//20
+                    new RunRotator(RobotContainer.s_Rotator, 0.508, 2)//20
                 );
             default://L1
                 return new SequentialCommandGroup(
@@ -105,9 +101,9 @@ public class StateCommands {
                     new ParallelRaceGroup(
                         new WaitCommand(0.5),
                         new RunElevator(RobotContainer.s_Elevator, -6.8, 7.1),
-                        new SpinArmIntake(RobotContainer.s_ArmIntake, 0)              
+                        new SpinArmIntake(RobotContainer.s_ArmIntake, 0)           
                     ),
-                    new RunRotator(RobotContainer.s_Rotator, 0.545, 200)//10
+                    new RunRotator(RobotContainer.s_Rotator, 0.295, 2)//10
                 );   
         }
     }
@@ -118,8 +114,8 @@ public class StateCommands {
             new SpinIntake(RobotContainer.s_Intake, 0),
             new SpinIndexer(RobotContainer.s_Indexer, 0),
             new SpinArmIntake(RobotContainer.s_ArmIntake, 0),
-            new RunRotator(RobotContainer.s_Rotator, 0.35, 200),//0
-            new RunElevator(RobotContainer.s_Elevator, 0, 0)
+            new RunRotator(RobotContainer.s_Rotator, 0.11, 1.5),//0
+            new RunElevator(RobotContainer.s_Elevator, 0, 4.2)
         );
     }
 
@@ -127,10 +123,10 @@ public class StateCommands {
         switch (level) {    
             case L2:
                 return new SequentialCommandGroup(
-                    new ParallelRaceGroup(
-                        new WaitCommand(1),
-                        new RunRotator(RobotContainer.s_Rotator, 0.586, 200),//12
-                        new SpinArmIntake(RobotContainer.s_ArmIntake, -0.1)
+                    new ParallelDeadlineGroup(
+                        new WaitCommand(0.7),
+                        new RunRotator(RobotContainer.s_Rotator, 0.315, 200),//12
+                        new SpinArmIntake(RobotContainer.s_ArmIntake, -0.15)
                     ),
                     new ParallelRaceGroup(
                         new WaitCommand(0.15),
@@ -139,29 +135,32 @@ public class StateCommands {
                     ),
                     new ParallelRaceGroup(
                         new WaitCommand(0.2),
-                        new RunRotator(RobotContainer.s_Rotator, 0.35, 200)//0
+                        new RunRotator(RobotContainer.s_Rotator, 0.11, 200)//0
                     ),
-                    new RunElevator(RobotContainer.s_Elevator, 0, 0)
+                    new RunElevator(RobotContainer.s_Elevator, 0, 0.66)
                 );
             case L3:
                 return new SequentialCommandGroup(
-                    new ParallelRaceGroup(
+                    new ParallelDeadlineGroup(
                         new WaitCommand(0.5),
-                        new RunRotator(RobotContainer.s_Rotator, 0.586, 200)//12
+                        new RunRotator(RobotContainer.s_Rotator, 0.33, 200)//12
                     ),
                     new ParallelRaceGroup(
                         new WaitCommand(0.1),
-                        new RunElevator(RobotContainer.s_Elevator, 0, 0)
+                        new RunElevator(RobotContainer.s_Elevator, 0, 0.66)
                     ),
-                    new RunRotator(RobotContainer.s_Rotator, 0.82, 200)//24
+                    new RunRotator(RobotContainer.s_Rotator, 0.58, 200)//24
                 );
-            case L4:
+            case L4: 
                 return new SequentialCommandGroup(
                     new ParallelRaceGroup(
                         new WaitCommand(0.5),
-                        new RunRotator(RobotContainer.s_Rotator, 0.35, 2)//0
+                        new RunRotator(RobotContainer.s_Rotator, 0.41, 20)//0
                     ),
-                    new RunElevator(RobotContainer.s_Elevator, 0, 0)
+                    new ParallelRaceGroup(
+                        new WaitCommand(0.3),
+                        new SpinArmIntake(RobotContainer.s_ArmIntake, -0.25)
+                    )
                 );
             default://L1
                 return new SequentialCommandGroup(
@@ -172,9 +171,9 @@ public class StateCommands {
                     new ParallelRaceGroup(
                         new WaitCommand(0.4),
                         new SpinArmIntake(RobotContainer.s_ArmIntake, 0),
-                        new RunRotator(RobotContainer.s_Rotator, 0.35, 200)//0
+                        new RunRotator(RobotContainer.s_Rotator, 0.11, 200)//0
                     ),
-                    new RunElevator(RobotContainer.s_Elevator, 0, 0)
+                    new RunElevator(RobotContainer.s_Elevator, 0, 0.66)
                 );
         }
     }
@@ -182,29 +181,74 @@ public class StateCommands {
     public static Command algaeIntakingL2() {
         return new ParallelCommandGroup(
             new RunElevator(RobotContainer.s_Elevator, -35.5, 35.7),
-            new RunRotator(RobotContainer.s_Rotator, 0.61, 200)//13
+            new RunRotator(RobotContainer.s_Rotator, 0.37, 200)//13
         );
     }
 
     public static Command algaeIntakingL1() {
         return new ParallelCommandGroup(
             new RunElevator(RobotContainer.s_Elevator, -5.69, 5.95),
-            new RunRotator(RobotContainer.s_Rotator, 0.617, 200)//13
+            new RunRotator(RobotContainer.s_Rotator, 0.377, 200)//13
         );
     }
 
     public static Command bargeScore() {
         return new ParallelCommandGroup(
             new RunElevator(RobotContainer.s_Elevator, -53.8, 54),
-            new RunRotator(RobotContainer.s_Rotator, 0.82, 200)//0.24
+            new RunRotator(RobotContainer.s_Rotator, 0.58, 200)//0.24
         );
     }
 
     public static Command prepClimb() {
         return new ParallelCommandGroup(
-            new RunRotator(RobotContainer.s_Rotator, 0.545, 200),
-            new RunIntakeWrist(RobotContainer.s_IntakeWrist, -5, 5.5)
+            new RunRotator(RobotContainer.s_Rotator, 0.305, 200),
+            new RunIntakeWrist(RobotContainer.s_IntakeWrist, -10.0, 5.5)
             // new SetClimbPos(RobotContainer.s_Climb, 150)
+        );
+    }
+
+    public static Command processorState() {
+        return new ParallelCommandGroup(
+            new RunRotator(RobotContainer.s_Rotator, 0.28, 200),
+            new RunElevator(RobotContainer.s_Elevator, 0, 0.66)
+        );
+    }
+
+    public static Command algaeGround() {
+        return new ParallelCommandGroup(
+            new RunIntakeWrist(RobotContainer.s_IntakeWrist, -22.7, 0),
+            new SpinIntake(RobotContainer.s_Intake, -0.15)
+        );
+    }
+
+    public static Command releaseAlgaeGround() {
+        return new SequentialCommandGroup(
+            new ParallelRaceGroup(
+                new WaitCommand(0.3),
+                new SpinIntake(RobotContainer.s_Intake, 1)
+            ),
+            defaultState()
+        );
+    }
+
+    public static Command intakeGroundAlgae() {
+        return new ParallelCommandGroup(
+            new RunIntakeWrist(RobotContainer.s_IntakeWrist, -25.84, 0),
+            new SpinIntake(RobotContainer.s_Intake, -0.35)
+        );
+    }
+
+    public static Command outtakeState() {
+        return new ParallelCommandGroup(
+            new SpinIntake(RobotContainer.s_Intake, 1),
+            new SpinIndexer(RobotContainer.s_Indexer, 0.5)
+        );
+    }
+
+    public static Command backwardBargeState() {
+        return new ParallelCommandGroup(
+            new RunRotator(RobotContainer.s_Rotator, 0.66, 0.5),
+            new RunElevator(RobotContainer.s_Elevator, 0, 54)
         );
     }
 }

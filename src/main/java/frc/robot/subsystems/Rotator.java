@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -37,6 +38,11 @@ public class Rotator extends SubsystemBase {
         // rotatorMotor.getConfigurator().apply(config.Feedback.withSensorToMechanismRatio(1));
         candi = new CANdi(59);
         rotatorMotor.getConfigurator().apply(new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANdiPWM1).withFeedbackRemoteSensorID(59));
+        rotatorMotor.getConfigurator().apply(new CurrentLimitsConfigs()
+        .withStatorCurrentLimit(60)
+        .withStatorCurrentLimitEnable(true)
+        .withSupplyCurrentLimit(60)
+        .withSupplyCurrentLimitEnable(true));
     }
 
     public void runRotatorToPos(double pos, double maxVelo) {
@@ -77,4 +83,7 @@ public class Rotator extends SubsystemBase {
         return deg * 0.14;
     }
     
+    public double getPos() {
+        return rotatorMotor.getPosition().getValueAsDouble();
+    }
 }

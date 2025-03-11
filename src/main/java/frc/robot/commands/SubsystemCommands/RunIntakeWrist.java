@@ -22,8 +22,8 @@ public class RunIntakeWrist extends Command {
         s_Wrist.runWristToPos(lPos, rPos);
     }
 
-    // @Override
-    // public void execute() {
-    //     SmartDashboard.putBoolean("wristCommand", this.isScheduled());
-    // }
+    @Override
+    public boolean isFinished() {
+        return (Math.abs(s_Wrist.getLPos() - lPos) < 1.5) || (Math.abs(s_Wrist.getRPos() - rPos) < 1.5);
+    }
 }
