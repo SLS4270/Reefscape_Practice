@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.States;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -14,10 +14,10 @@ import frc.robot.commands.SubsystemCommands.RunRotator;
 import frc.robot.commands.SubsystemCommands.SpinArmIntake;
 import frc.robot.commands.SubsystemCommands.SpinIndexer;
 import frc.robot.commands.SubsystemCommands.SpinIntake;
-import frc.robot.subsystems.ArmIntake;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.ArmIntake.BallIntakeState;
-import frc.robot.subsystems.ArmIntake.CoralIntakeState;
+import frc.robot.subsystems.Intakes.ArmIntake;
+import frc.robot.subsystems.Intakes.ArmIntake.BallIntakeState;
+import frc.robot.subsystems.Intakes.ArmIntake.CoralIntakeState;
 
 public class StateCommands {
 

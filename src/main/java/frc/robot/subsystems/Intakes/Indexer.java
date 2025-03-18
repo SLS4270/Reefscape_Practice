@@ -1,11 +1,11 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Intakes;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.constants.Constants;
 
 public class Indexer extends SubsystemBase {
     TalonFX indexer;

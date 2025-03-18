@@ -10,8 +10,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.commands.StateCommands.CoralLevels;
+import frc.robot.commands.States.StateCommands.CoralLevels;
+import frc.robot.constants.Constants;
 
 public class Elevator extends SubsystemBase {
 

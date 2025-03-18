@@ -1,7 +1,7 @@
 package frc.robot.commands.SubsystemCommands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.IntakeWrist;
+import frc.robot.subsystems.Wrists.IntakeWrist;
 
 public class RunIntakeWrist extends Command {
     IntakeWrist s_Wrist;

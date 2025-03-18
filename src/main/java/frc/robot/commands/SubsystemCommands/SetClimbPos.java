@@ -1,7 +1,7 @@
 package frc.robot.commands.SubsystemCommands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Climb;
+import frc.robot.subsystems.Wrists.Climb;
 
 public class SetClimbPos extends Command {
     Climb s_Climb;

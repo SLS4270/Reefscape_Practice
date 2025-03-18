@@ -1,7 +1,7 @@
 package frc.robot.commands.SubsystemCommands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Rotator;
+import frc.robot.subsystems.Wrists.Rotator;
 
 public class RunRotator extends Command {
     Rotator s_Rotator;

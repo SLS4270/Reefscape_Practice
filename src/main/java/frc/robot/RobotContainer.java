@@ -4,25 +4,26 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
-import frc.robot.commands.SetState;
-import frc.robot.commands.SwerveTurn;
-import frc.robot.commands.SwerveTurnRed;
-import frc.robot.commands.SetState.States;
-import frc.robot.commands.StateCommands.CoralLevels;
+import frc.robot.commands.States.SetState;
+import frc.robot.commands.States.SetState.States;
+import frc.robot.commands.States.StateCommands.CoralLevels;
 import frc.robot.commands.SubsystemCommands.SpinArmIntake;
 import frc.robot.commands.SubsystemCommands.SpinClimb;
-import frc.robot.commands.SwerveTurn.Side;
-import frc.robot.subsystems.ArmIntake;
-import frc.robot.subsystems.Climb;
+import frc.robot.commands.TeleopAlignment.SwerveTurn;
+import frc.robot.commands.TeleopAlignment.SwerveTurnRed;
+import frc.robot.commands.TeleopAlignment.SwerveTurn.Side;
+import frc.robot.constants.TunerConstants;
+import frc.robot.constants.Constants.OperatorConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Indexer;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.IntakeWrist;
-import frc.robot.subsystems.Rotator;
-import frc.robot.subsystems.ArmIntake.CoralIntakeState;
+import frc.robot.subsystems.Intakes.ArmIntake;
+import frc.robot.subsystems.Intakes.Indexer;
+import frc.robot.subsystems.Intakes.Intake;
+import frc.robot.subsystems.Intakes.ArmIntake.CoralIntakeState;
+import frc.robot.subsystems.Wrists.Climb;
+import frc.robot.subsystems.Wrists.IntakeWrist;
+import frc.robot.subsystems.Wrists.Rotator;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -86,6 +87,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("BargePrep", new SetState(States.BackwardBarge));
     NamedCommands.registerCommand("ArmReturn", new SetState(States.Default));
     NamedCommands.registerCommand("Slam4", new SetState(States.ScoringL4));
+
     m_chooser = new SendableChooser<>();
     m_chooser.setDefaultOption("2.5", new Autos("3-Left"));
     m_chooser.addOption("L4 + 2 Algae", new Autos("L4 + Alagae"));

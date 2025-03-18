@@ -1,7 +1,7 @@
-package frc.robot.commands;
+package frc.robot.commands.States;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.StateCommands.CoralLevels;
+import frc.robot.commands.States.StateCommands.CoralLevels;
 
 public class SetState extends SequentialCommandGroup {
     
