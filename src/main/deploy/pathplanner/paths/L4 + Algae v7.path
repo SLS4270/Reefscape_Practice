@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.179545454545455,
-        "y": 1.7730823863636362
+        "x": 7.959,
+        "y": 5.0737
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.2073153409090915,
-        "y": 1.18309659090909
+        "x": 7.709,
+        "y": 5.0737
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.226775568181819,
-        "y": 2.91981534090909
+        "x": 6.850657894736842,
+        "y": 5.0737
       },
       "prevControl": {
-        "x": 5.800142045454546,
-        "y": 1.4157670454545446
+        "x": 7.100657894736842,
+        "y": 5.0737
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 119.99999999999999
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "2.5Mirror",
+  "folder": "CoralBall",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 180.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

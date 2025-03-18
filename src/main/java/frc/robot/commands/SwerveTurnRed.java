@@ -8,14 +8,14 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
-public class SwerveTurn extends SequentialCommandGroup{
+public class SwerveTurnRed extends SequentialCommandGroup{
 
     public static enum Side {
         Left,
         Right
     }
     
-    public SwerveTurn (double angleToTurnTo, Side side) {
+    public SwerveTurnRed(double angleToTurnTo, SwerveTurn.Side side) {
         SwerveRequest.FieldCentricFacingAngle angle = new SwerveRequest.FieldCentricFacingAngle()
             .withTargetDirection(Rotation2d.fromDegrees(angleToTurnTo))
             .withRotationalDeadband(RobotContainer.MaxAngularRate * 0.01)
@@ -27,17 +27,17 @@ public class SwerveTurn extends SequentialCommandGroup{
         double yKP = 4.25;
         // double driveRadius = 0.343;
         double driveRadius = 0.41;
-        if (side == Side.Right) {
+        if (side == SwerveTurn.Side.Right) {
             addCommands(
                 RobotContainer.drivetrain.applyRequest(() -> angle
                     .withVelocityX(
-                        ((RobotContainer.drivetrain.findClosestApriltag(Constants.allApriltagPoses).getX() - 0.18 * Math.sin(Math.toRadians(-angleToTurnTo)))
-                         - RobotContainer.drivetrain.getPoseEstimate().getX()
+                        (-(RobotContainer.drivetrain.findClosestApriltag(Constants.allApriltagPoses).getX() + 0.18 * Math.sin(Math.toRadians(-angleToTurnTo)))
+                         + RobotContainer.drivetrain.getPoseEstimate().getX()
                           - (driveRadius * Math.cos(Math.toRadians(angleToTurnTo))))
                           * xKP)
                     .withVelocityY(
-                            ((RobotContainer.drivetrain.findClosestApriltag(Constants.allApriltagPoses).getY() - 0.18 * Math.cos(Math.toRadians(-angleToTurnTo)))
-                                - RobotContainer.drivetrain.getPoseEstimate().getY()
+                            (-(RobotContainer.drivetrain.findClosestApriltag(Constants.allApriltagPoses).getY() + 0.18 * Math.cos(Math.toRadians(-angleToTurnTo)))
+                                + RobotContainer.drivetrain.getPoseEstimate().getY()
                                  - (driveRadius * Math.sin(Math.toRadians(angleToTurnTo)))) 
                                 * yKP)
                 )
@@ -46,12 +46,12 @@ public class SwerveTurn extends SequentialCommandGroup{
             addCommands(
                 RobotContainer.drivetrain.applyRequest(() -> angle
                     .withVelocityX(
-                        ((RobotContainer.drivetrain.findClosestApriltag(Constants.allApriltagPoses).getX() + 0.18 * Math.sin(Math.toRadians(-angleToTurnTo)))
-                         - RobotContainer.drivetrain.getPoseEstimate().getX() - (driveRadius * Math.cos(Math.toRadians(angleToTurnTo))))
+                        (-(RobotContainer.drivetrain.findClosestApriltag(Constants.allApriltagPoses).getX() - 0.18 * Math.sin(Math.toRadians(-angleToTurnTo)))
+                         + RobotContainer.drivetrain.getPoseEstimate().getX() - (driveRadius * Math.cos(Math.toRadians(angleToTurnTo))))
                           * xKP)
                     .withVelocityY(
-                            ((RobotContainer.drivetrain.findClosestApriltag(Constants.allApriltagPoses).getY() + 0.18 * Math.cos(Math.toRadians(-angleToTurnTo)))
-                                - RobotContainer.drivetrain.getPoseEstimate().getY() - (driveRadius * Math.sin(Math.toRadians(angleToTurnTo)))) 
+                            (-(RobotContainer.drivetrain.findClosestApriltag(Constants.allApriltagPoses).getY() - 0.18 * Math.cos(Math.toRadians(-angleToTurnTo)))
+                                + RobotContainer.drivetrain.getPoseEstimate().getY() - (driveRadius * Math.sin(Math.toRadians(angleToTurnTo)))) 
                                 * yKP)
                             )
             );

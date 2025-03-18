@@ -23,6 +23,6 @@ public class RunRotator extends Command {
 
     @Override
     public boolean isFinished() {
-        return Math.abs(s_Rotator.getPos() - pos) < 0.03;
+        return Math.abs(s_Rotator.getPos() - pos) < 0.2;
     }
 }

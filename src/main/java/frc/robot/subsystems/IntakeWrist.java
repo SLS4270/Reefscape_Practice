@@ -14,11 +14,9 @@ import frc.robot.Constants;
 public class IntakeWrist extends SubsystemBase{
     
     TalonFX wristIntake1;
-    TalonFX wristIntake2;
 
     public IntakeWrist() {
         wristIntake1 = new TalonFX(Constants.intakeWristID1);
-        wristIntake2 = new TalonFX(Constants.intakeWristID2);
 
         wristIntake1.setNeutralMode(NeutralModeValue.Brake);
         wristIntake1.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
@@ -27,36 +25,23 @@ public class IntakeWrist extends SubsystemBase{
             .withMotionMagicExpo_kA(0.00001));
         wristIntake1.getConfigurator().apply(new Slot0Configs().withKP(1));
         wristIntake1.getConfigurator().apply(new CurrentLimitsConfigs()
-        .withStatorCurrentLimit(60)
+        .withStatorCurrentLimit(40)
         .withStatorCurrentLimitEnable(true)
-        .withSupplyCurrentLimit(60)
+        .withSupplyCurrentLimit(40)
         .withSupplyCurrentLimitEnable(true));
-
-        wristIntake2.setNeutralMode(NeutralModeValue.Brake);
-        wristIntake2.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
-        .withMotionMagicCruiseVelocity(200)
-        .withMotionMagicExpo_kV(0.00001)
-        .withMotionMagicExpo_kA(0.00001));
-        wristIntake2.getConfigurator().apply(new Slot0Configs().withKP(1));
     }
 
-    public void runWristToPos(double lPos, double rPos) {
-        wristIntake1.setControl(new MotionMagicExpoVoltage(lPos));
-        wristIntake2.setControl(new MotionMagicExpoVoltage(rPos));
+    public void runWristToPos(double lPos) {
+        wristIntake1.setControl(new MotionMagicExpoVoltage(lPos).withEnableFOC(true));
     }
 
     @Override
     public void periodic() {
         SmartDashboard.putNumber("lPositionWrist", wristIntake1.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("rPositionWrist", wristIntake2.getPosition().getValueAsDouble());
     }
 
     public double getLPos() {
         return wristIntake1.getPosition().getValueAsDouble();
-    }
-
-    public double getRPos() {
-        return wristIntake2.getPosition().getValueAsDouble();
     }
 
     //stow: L: -3.3 R: 3.8

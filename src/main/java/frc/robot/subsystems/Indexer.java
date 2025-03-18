@@ -4,7 +4,6 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -15,9 +14,9 @@ public class Indexer extends SubsystemBase {
     public Indexer() {
         indexer = new TalonFX(Constants.indexerID);
         indexer.getConfigurator().apply(new CurrentLimitsConfigs()
-        .withStatorCurrentLimit(60)
+        .withStatorCurrentLimit(40)
         .withStatorCurrentLimitEnable(true)
-        .withSupplyCurrentLimit(60)
+        .withSupplyCurrentLimit(40)
         .withSupplyCurrentLimitEnable(true));
         indexerSensor = new CANrange(0);
     }

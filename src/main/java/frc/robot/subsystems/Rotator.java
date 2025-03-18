@@ -9,10 +9,8 @@ import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.AbsoluteEncoder;
 
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -31,8 +29,8 @@ public class Rotator extends SubsystemBase {
         // rotatorMotor.setPosition(0);
         rotatorMotor.getConfigurator().apply(config.MotionMagic
             .withMotionMagicCruiseVelocity(200)
-            .withMotionMagicExpo_kV(0.001)
-            .withMotionMagicExpo_kA(0.0004));
+            .withMotionMagicExpo_kV(0.0001)
+            .withMotionMagicExpo_kA(0.0001));
         rotatorMotor.getConfigurator().apply(new Slot0Configs().withKP(35));
         // rotatorMotor.setPosition(0);
         // rotatorMotor.getConfigurator().apply(config.Feedback.withSensorToMechanismRatio(1));
@@ -57,7 +55,7 @@ public class Rotator extends SubsystemBase {
         //     .withMotionMagicExpo_kV(0.005)
         //     .withMotionMagicExpo_kA(0.005));
         // }
-        rotatorMotor.setControl(new MotionMagicExpoVoltage(pos));
+        rotatorMotor.setControl(new MotionMagicExpoVoltage(pos).withEnableFOC(true));
     }
 
     @Override

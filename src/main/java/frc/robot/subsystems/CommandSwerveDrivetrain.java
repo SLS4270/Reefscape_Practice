@@ -7,20 +7,17 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.MountPoseConfigs;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.commands.PathfindThenFollowPath;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -32,6 +29,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -68,9 +67,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public double angleToTurnTo;
 
     StructPublisher<Pose2d> publisher;
+    StructPublisher<Pose2d> publisher2;
+    StructPublisher<Pose2d> publisher3;
     Pose2d pose;
+    Pose2d nearestTag;
     SwerveDrivePoseEstimator poseEstimator;
     public boolean hasTargets;
+    public double disNuts;
 
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -155,10 +158,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         publisher = NetworkTableInstance.getDefault()
             .getStructTopic("MyPose", Pose2d.struct).publish();
+        publisher2 = NetworkTableInstance.getDefault()
+            .getStructTopic("nearestTag", Pose2d.struct).publish();
+        publisher3 = NetworkTableInstance.getDefault()
+            .getStructTopic("LL3A", Pose2d.struct).publish();
         LimelightHelpers.setCameraPose_RobotSpace("limelight-front", 0.234, 0.02, 0.254, 0, 0, 21.45);
         LimelightHelpers.setCameraPose_RobotSpace("limelight", 0.234, -0.02, 0.254, 0, 0, -21.45);
+        LimelightHelpers.setCameraPose_RobotSpace("limelight-climb", -0.19, 0.267, 1.02, 180, -45, 155);
         poseEstimator = new SwerveDrivePoseEstimator(getKinematics(), this.getPigeon2().getRotation2d(), this.getState().ModulePositions, new Pose2d());
         angleToTurnTo = 0.0;
+        pose = new Pose2d();
+        nearestTag = new Pose2d();
+
     }
 
     /**
@@ -277,31 +288,46 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             hasTargets = false;
         }
 
-        if (DriverStation.getAlliance().isPresent()) {
-            if (DriverStation.getAlliance().get() == Alliance.Blue) {
-                angleToTurnTo = findClosestApriltag(Constants.apriltagPosesXYBlueCoral).getRotation().getDegrees() - 180;
-            } else {
-                angleToTurnTo = (findClosestApriltag(Constants.apriltagPosesXYRedCoral).getRotation().getDegrees() + 180.0) % 180;
-            }
-        }
+        // if (DriverStation.getAlliance().isPresent()) {
+        //     if (DriverStation.getAlliance().get() == Alliance.Blue) {
+        //         angleToTurnTo = findClosestApriltag(Constants.apriltagPosesXYBlueCoral).getRotation().getDegrees() - 180;
+        //     } else {
+        //         angleToTurnTo = (findClosestApriltag(Constants.apriltagPosesXYRedCoral).getRotation().getDegrees() + 180.0) % 180;
+        //     }
+        // }
+        angleToTurnTo = findClosestApriltag(Constants.allApriltagPoses).getRotation().getDegrees() - 180;
         // angleToTurnTo = (findClosestApriltag(Constants.apriltagPosesXYBlueCoral).getRotation().getDegrees() + 180.0) % 180;
 
 
         SmartDashboard.putNumber("turnToWhatAngle", angleToTurnTo);
-        SmartDashboard.putNumber("currentAngle", this.getPigeon2().getYaw().getValueAsDouble());
+        SmartDashboard.putNumber("currentAngle", this.getPigeon2().getRotation2d().getDegrees());
         SmartDashboard.putNumber("LimelightTest", LimelightHelpers.getTX("limelight-front"));
         updateOdometry();
+        pose = poseEstimator.getEstimatedPosition();
+        nearestTag = findClosestApriltag(Constants.allApriltagPoses);
+        disNuts = poseEstimator.getEstimatedPosition().getTranslation().getDistance(findClosestApriltag(Constants.allApriltagPoses).getTranslation());
+        SmartDashboard.putNumber("distanceToTag", distanceToTag());
+
         // pose = new Pose2d(this.getState().Pose.getTranslation(), this.getState().Pose.getRotation());
-        publisher.set(poseEstimator.getEstimatedPosition());
+        publisher.set(pose);
+        publisher2.set(findClosestApriltag(Constants.allApriltagPoses));
+        publisher3.set(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-climb").pose);
     }
 
     public void updateOdometry() {
         poseEstimator.update(this.getPigeon2().getRotation2d(), this.getState().ModulePositions);
         LimelightHelpers.SetRobotOrientation("limelight-front", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.SetRobotOrientation("limelight", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.SetRobotOrientation("limelight-climb", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
         if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").tagCount > 0) {
-            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.9, 0.9, 9999999));
+            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.8, 0.8, 9999999));
             poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").pose, 
                                           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").timestampSeconds);
+        } 
+        if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").tagCount > 0) {
+            poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.8, 0.8, 9999999));
+            poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").pose, 
+                                          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").timestampSeconds);
         } 
         // else if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").tagCount > 0) {
         //     poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(1, 1, 9999999));
@@ -331,7 +357,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
                 () -> poseEstimator.getEstimatedPosition(), 
-                this.poseEstimator::resetPose, 
+                this::resetOdom, 
                 () -> this.getState().Speeds, 
                 (speeds, feedforwards) -> setControl(
                     new SwerveRequest.ApplyRobotSpeeds().withSpeeds(speeds)
@@ -389,7 +415,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void tareSwerve() {
-        this.getPigeon2().setYaw(0);
+        this.getPigeon2().getRotation2d().rotateBy(new Rotation2d(Math.PI/2));
     }
 
     public void tareSwerve(double angle) {
@@ -400,17 +426,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return poseEstimator.getEstimatedPosition();
     }
 
-    public Command teleopPathfollowing(Pose2d[] apriltagPoses) {
-        PathPlannerPath path = new PathPlannerPath(
-            PathPlannerPath.waypointsFromPoses(
-                    new Pose2d(poseEstimator.getEstimatedPosition().getX(),
-                                poseEstimator.getEstimatedPosition().getY(),
-                                Rotation2d.fromDegrees(poseEstimator.getEstimatedPosition().getRotation().getDegrees() - 180)),
-                    poseEstimator.getEstimatedPosition().nearest(Arrays.asList(apriltagPoses))
-                ), 
-            new PathConstraints(4.0, 4.0, 3.0 * Math.PI, 4.0 * Math.PI), 
-            null, 
-            new GoalEndState(0.0, Rotation2d.fromDegrees(poseEstimator.getEstimatedPosition().nearest(Arrays.asList(apriltagPoses)).getRotation().getDegrees() - 180)));
-        return AutoBuilder.pathfindThenFollowPath(path, new PathConstraints(4.0, 4.0, 3.0 * Math.PI, 4.0 * Math.PI));
+    public double distanceToTag() {
+        return disNuts;
+    }
+
+    public void resetOdom(Pose2d pose) {
+        this.getPigeon2().setYaw(pose.getRotation().getDegrees() + 90.0);
+        poseEstimator.resetPose(pose);
     }
 }

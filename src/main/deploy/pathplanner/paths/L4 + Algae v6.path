@@ -8,27 +8,48 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.324210469098707,
-        "y": 4.505135600800263
+        "x": 6.5640710178654125,
+        "y": 2.195853905469679
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.434517045454545,
-        "y": 2.4943607954545453
+        "x": 5.081504461655435,
+        "y": 2.991414826948481
       },
       "prevControl": {
-        "x": 6.0170992129404475,
-        "y": 3.1210723007715435
+        "x": 5.3855587984196704,
+        "y": 2.463717251280663
+      },
+      "nextControl": {
+        "x": 4.956692924494817,
+        "y": 3.208029877652729
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.958842139373996,
+        "y": 5.072934084983197
+      },
+      "prevControl": {
+        "x": 5.939633737524751,
+        "y": 1.588924212428286
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.9999999999999999,
+      "rotationDegrees": 119.99999999999999
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
@@ -40,6 +61,28 @@
         "type": "named",
         "data": {
           "name": "A2 Prep"
+        }
+      }
+    },
+    {
+      "name": "BargePrep3",
+      "waypointRelativePos": 1.6086175942549326,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "BargePrep"
+        }
+      }
+    },
+    {
+      "name": "BargeScore3",
+      "waypointRelativePos": 1.9389587073608614,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Outtake"
         }
       }
     }
@@ -54,7 +97,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": "CoralBall",

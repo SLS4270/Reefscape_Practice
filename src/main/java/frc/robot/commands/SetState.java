@@ -1,8 +1,6 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.StateCommands.CoralLevels;
 
 public class SetState extends SequentialCommandGroup {
@@ -16,10 +14,12 @@ public class SetState extends SequentialCommandGroup {
         PrepScoreL2,
         PrepScoreL3,
         PrepScoreL4,
+        PrepScoreL4Auto,
         ScoringL1,
         ScoringL2,
         ScoringL3,
         ScoringL4,
+        ScoringL4Auto,
         Climbing,
         Return,
         AlgaeHigh,
@@ -29,11 +29,22 @@ public class SetState extends SequentialCommandGroup {
         GroundAlgae,
         ScoreGroundAlgae,
         GroundAlgaeIntake,
-        BackwardBarge
+        BackwardBarge,
+        IntakeL1,
+        SmartScoreL1,
+        SmartScoreL2,
+        SmartScoreL3,
+        SmartScoreL4,
+        BallReturn
     }
 
     public SetState (States state) {
         switch (state) {
+            case IntakeL1:
+                addCommands(
+                    StateCommands.L1intake()
+                );
+                break;
             case Default:      
                 addCommands(
                     StateCommands.defaultState()
@@ -67,6 +78,16 @@ public class SetState extends SequentialCommandGroup {
             case PrepScoreL4:
                 addCommands(
                     StateCommands.prepCoralScore(CoralLevels.L4)
+                );
+                break;
+            case PrepScoreL4Auto:
+                addCommands(
+                    StateCommands.prepCoralScore(CoralLevels.L4Auto)
+                );
+                break;
+            case ScoringL4Auto:
+                addCommands(
+                    StateCommands.scoringState(CoralLevels.L4Auto)
                 );
                 break;
             case ScoringL4:
@@ -142,7 +163,32 @@ public class SetState extends SequentialCommandGroup {
                 break;
             case BackwardBarge:
                 addCommands(
-                    StateCommands.backwardBargeState()
+                    StateCommands.throwAlgae()
+                );
+                break;
+            case SmartScoreL1:
+                addCommands(
+                    StateCommands.smartScoringState(CoralLevels.L1)
+                );
+                break;
+            case SmartScoreL2:
+                addCommands(
+                    StateCommands.smartScoringState(CoralLevels.L2)
+                );
+                break;
+            case SmartScoreL3:
+                addCommands(
+                    StateCommands.smartScoringState(CoralLevels.L3)
+                );
+                break;
+            case SmartScoreL4:
+                addCommands(
+                    StateCommands.smartScoringState(CoralLevels.L4)
+                );
+                break;
+            case BallReturn:
+                addCommands(
+                    StateCommands.ballDefaultState()
                 );
                 break;
         }

@@ -16,19 +16,40 @@
     },
     {
       "anchor": {
-        "x": 7.545170454545455,
-        "y": 6.0525568181818175
+        "x": 7.745476973684211,
+        "y": 6.632483552631579
       },
       "prevControl": {
-        "x": 6.273792613636364,
-        "y": 6.119034090909091
+        "x": 5.378536184210526,
+        "y": 6.930756578947369
+      },
+      "nextControl": {
+        "x": 8.024938142887482,
+        "y": 6.597266901227915
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.724259868421052,
+        "y": 7.06546052631579
+      },
+      "prevControl": {
+        "x": 5.359948788875592,
+        "y": 7.032221889952153
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.3144654088050358,
+      "rotationDegrees": 180.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
@@ -54,7 +75,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": "CoralBall",

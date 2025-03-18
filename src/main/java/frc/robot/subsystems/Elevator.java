@@ -27,16 +27,16 @@ public class Elevator extends SubsystemBase {
 
         lElevator.setNeutralMode(NeutralModeValue.Brake);
         lElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
-            .withMotionMagicCruiseVelocity(150)
-            .withMotionMagicExpo_kV(0.01)
-            .withMotionMagicExpo_kA(0.001));
+            .withMotionMagicCruiseVelocity(300)
+            .withMotionMagicExpo_kV(0.0001)
+            .withMotionMagicExpo_kA(0.0001));
         lElevator.getConfigurator().apply(new Slot0Configs().withKP(1).withGravityType(GravityTypeValue.Elevator_Static).withKG(0.1));
 
         rElevator.setNeutralMode(NeutralModeValue.Brake);
         rElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
-            .withMotionMagicCruiseVelocity(150)
-            .withMotionMagicExpo_kV(0.01)
-            .withMotionMagicExpo_kA(0.001));
+            .withMotionMagicCruiseVelocity(300)
+            .withMotionMagicExpo_kV(0.0001)
+            .withMotionMagicExpo_kA(0.0001));
         rElevator.getConfigurator().apply(new Slot0Configs().withKP(1).withGravityType(GravityTypeValue.Elevator_Static).withKG(0.1));
         rElevator.getConfigurator().apply(new CurrentLimitsConfigs()
         .withStatorCurrentLimit(60)
@@ -48,9 +48,18 @@ public class Elevator extends SubsystemBase {
     }
     
     public void runElevatorToPos(double lPos, double rPos) {
-        lElevator.setControl(new MotionMagicExpoVoltage(lPos));
-        rElevator.setControl(new MotionMagicExpoVoltage(rPos));
+        // lElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic.withMotionMagicCruiseVelocity(300));
+        // rElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic.withMotionMagicCruiseVelocity(300));
+        lElevator.setControl(new MotionMagicExpoVoltage(lPos).withEnableFOC(true));
+        rElevator.setControl(new MotionMagicExpoVoltage(rPos).withEnableFOC(true));
     }
+
+    // public void runElevatorToPos(double lPos, double rPos, double maxVelo) {
+    //     lElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic.withMotionMagicCruiseVelocity(maxVelo));
+    //     rElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic.withMotionMagicCruiseVelocity(maxVelo));
+    //     lElevator.setControl(new MotionMagicExpoVoltage(lPos).withEnableFOC(true));
+    //     rElevator.setControl(new MotionMagicExpoVoltage(rPos).withEnableFOC(true));
+    // }
 
     @Override
     public void periodic() {

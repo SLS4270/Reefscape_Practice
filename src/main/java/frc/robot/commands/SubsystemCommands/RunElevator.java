@@ -16,6 +16,15 @@ public class RunElevator extends Command {
         addRequirements(subsys);
     }
 
+    // public RunElevator(Elevator subsys, double lPos, double rPos, double maxVelo) {
+    //     s_Elevator = subsys;
+    //     this.lPos = lPos;
+    //     this.rPos = rPos;
+    //     this.maxVelo = maxVelo;
+
+    //     addRequirements(subsys);
+    // }
+
     @Override
     public void initialize() {
         s_Elevator.runElevatorToPos(lPos, rPos);

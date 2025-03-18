@@ -51,6 +51,12 @@
           "data": {
             "pathName": "L4 + Algae v6"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L4 + Algae v7"
+          }
         }
       ]
     }

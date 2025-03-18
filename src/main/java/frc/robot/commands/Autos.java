@@ -27,6 +27,12 @@ public final class Autos extends SequentialCommandGroup{
       } else {
         tareAngle = 270;
       }
+    } else if (pathName.equals("3-Right")) {
+      if (DriverStation.getAlliance().get() == Alliance.Red) {
+        tareAngle = 90;
+      } else {
+        tareAngle = -90;
+      }
     } else {
       if (DriverStation.getAlliance().get() == Alliance.Red) {
         tareAngle = 180;
