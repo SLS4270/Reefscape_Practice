@@ -141,9 +141,9 @@ public final class Constants {
     }
 
     public final class Climb {
-      public static final double climbOut = 220;
+      public static final double climbOut = 210;
       public static final double climbDefault = 58;
-      public static final double climbIn = 5;
+      public static final double climbIn = 8;
     }
 
   }
@@ -198,9 +198,9 @@ public final class Constants {
     }
 
     public final class Climb {
-      public static final double climbOut = 220;//268.31
+      public static final double climbOut = 210;//268.31
       public static final double climbDefault = 58;
-      public static final double climbIn = 5;
+      public static final double climbIn = 8;
     }
   }
   
