@@ -15,17 +15,23 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -64,6 +70,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     StructPublisher<Pose2d> publisher;
     StructPublisher<Pose2d> publisher2;
     StructPublisher<Pose2d> publisher3;
+    StructPublisher<Pose2d> publisher4;
+
+    StructArrayPublisher<SwerveModuleState> swerveStates;
+    StructPublisher<ChassisSpeeds> swerveSpeeds;
+    StructPublisher<Rotation2d> swerveRotation;
     Pose2d pose;
     Pose2d nearestTag;
     SwerveDrivePoseEstimator poseEstimator;
@@ -157,14 +168,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             .getStructTopic("nearestTag", Pose2d.struct).publish();
         publisher3 = NetworkTableInstance.getDefault()
             .getStructTopic("LL3A", Pose2d.struct).publish();
+        publisher4 = NetworkTableInstance.getDefault()
+            .getStructTopic("Phoneix Pose", Pose2d.struct).publish();
+
+        swerveStates = NetworkTableInstance.getDefault().getStructArrayTopic("states", SwerveModuleState.struct).publish();
+        swerveSpeeds = NetworkTableInstance.getDefault().getStructTopic("speeds", ChassisSpeeds.struct).publish();
+        swerveRotation = NetworkTableInstance.getDefault().getStructTopic("rotation", Rotation2d.struct).publish();
+        this.seedFieldCentric();
         LimelightHelpers.setCameraPose_RobotSpace("limelight-front", 0.234, 0.02, 0.254, 0, 0, 21.45);
         LimelightHelpers.setCameraPose_RobotSpace("limelight", 0.234, -0.02, 0.254, 0, 0, -21.45);
         LimelightHelpers.setCameraPose_RobotSpace("limelight-climb", -0.19, 0.267, 1.02, 180, -45, 155);
-        poseEstimator = new SwerveDrivePoseEstimator(getKinematics(), this.getPigeon2().getRotation2d(), this.getState().ModulePositions, new Pose2d());
+        poseEstimator = new SwerveDrivePoseEstimator(
+            getKinematics(), 
+            this.getPigeon2().getRotation2d(),
+            // Rotation2d.fromDegrees(
+            //     DriverStation.getAlliance().get() == Alliance.Red ? 
+            //         this.getPigeon2().getRotation2d().getDegrees() - 90 : 
+            //         this.getPigeon2().getRotation2d().getDegrees() + 90), 
+            this.getState().ModulePositions, 
+            new Pose2d());
         angleToTurnTo = 0.0;
         pose = new Pose2d();
         nearestTag = new Pose2d();
 
+        Shuffleboard.getTab("SmartDashboard").addCamera("LLclimb", "limelight-climber", "ip:http://10.42.70.100:5800/?action=stream");
     }
 
     /**
@@ -282,14 +309,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         } else {
             hasTargets = false;
         }
-
-        // if (DriverStation.getAlliance().isPresent()) {
-        //     if (DriverStation.getAlliance().get() == Alliance.Blue) {
-        //         angleToTurnTo = findClosestApriltag(Constants.apriltagPosesXYBlueCoral).getRotation().getDegrees() - 180;
-        //     } else {
-        //         angleToTurnTo = (findClosestApriltag(Constants.apriltagPosesXYRedCoral).getRotation().getDegrees() + 180.0) % 180;
-        //     }
-        // }
         angleToTurnTo = findClosestApriltag(Constants.allApriltagPoses).getRotation().getDegrees() - 180;
         // angleToTurnTo = (findClosestApriltag(Constants.apriltagPosesXYBlueCoral).getRotation().getDegrees() + 180.0) % 180;
 
@@ -307,6 +326,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         publisher.set(pose);
         publisher2.set(findClosestApriltag(Constants.allApriltagPoses));
         publisher3.set(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-climb").pose);
+        publisher4.set(this.getState().Pose);
+
+        swerveStates.set(this.getState().ModuleStates);
+        swerveSpeeds.set(this.getState().Speeds);
+        swerveRotation.set(this.getState().Pose.getRotation());
     }
 
     public void updateOdometry() {
@@ -318,17 +342,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.8, 0.8, 9999999));
             poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").pose, 
                                           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").timestampSeconds);
+            this.setVisionMeasurementStdDevs(VecBuilder.fill(0.8, 0.8, 9999999));
+            this.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").pose, 
+                                          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").timestampSeconds);
         } 
         if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").tagCount > 0) {
             poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.8, 0.8, 9999999));
             poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").pose, 
                                           LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").timestampSeconds);
+            this.setVisionMeasurementStdDevs(VecBuilder.fill(0.8, 0.8, 9999999));
+            this.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").pose, 
+                                          LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").timestampSeconds);
         } 
-        // else if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").tagCount > 0) {
-        //     poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(1, 1, 9999999));
-        //     poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").pose, 
-        //                               LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight").timestampSeconds);
-        // }
     }
 
     private void startSimThread() {
@@ -352,7 +377,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
                 () -> poseEstimator.getEstimatedPosition(), 
-                this::resetOdom, 
+                this.poseEstimator::resetPose, 
                 () -> this.getState().Speeds, 
                 (speeds, feedforwards) -> setControl(
                     new SwerveRequest.ApplyRobotSpeeds().withSpeeds(speeds)
@@ -410,11 +435,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void tareSwerve() {
-        this.getPigeon2().getRotation2d().rotateBy(new Rotation2d(Math.PI/2));
+        this.getPigeon2().setYaw(0);
     }
 
-    public void tareSwerve(double angle) {
-        this.getPigeon2().setYaw(angle);
+    public void tarePose() {
+        this.resetPose(poseEstimator.getEstimatedPosition());
     }
 
     public Pose2d getPoseEstimate() {

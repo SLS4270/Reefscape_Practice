@@ -1,53 +1,47 @@
 package frc.robot.subsystems.Wrists;
 
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.ClosedLoopConfig;
-import com.revrobotics.spark.config.MAXMotionConfig;
-import com.revrobotics.spark.config.SparkBaseConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Constants;
 
 public class Climb extends SubsystemBase{
-    SparkMax climbMotor;
-    SparkClosedLoopController pidController;
-    SparkBaseConfig configs;
+
+    TalonFX climb;
 
     public Climb() {
-        climbMotor = new SparkMax(Constants.climbID, MotorType.kBrushless);
-        configs = new SparkMaxConfig();
-        configs.apply(new ClosedLoopConfig().pidf(1, 0, 0, 0)
-                .apply(new MAXMotionConfig()
-                .allowedClosedLoopError(5)
-                .maxVelocity(100)
-                .maxAcceleration(15)
-                .positionMode(MAXMotionPositionMode.kMAXMotionTrapezoidal))
-                );
-        climbMotor.configure(configs, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        pidController = climbMotor.getClosedLoopController();
-        
-        climbMotor.getEncoder().setPosition(0);
+        climb = new TalonFX(Constants.climbID);
+
+        climb.setNeutralMode(NeutralModeValue.Brake);
+        climb.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
+            .withMotionMagicCruiseVelocity(200)
+            .withMotionMagicExpo_kV(0.00001)
+            .withMotionMagicExpo_kA(0.00001));
+            climb.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
+        climb.getConfigurator().apply(new Slot0Configs().withKP(1));
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("climbPos", climbMotor.getEncoder().getPosition());
-        SmartDashboard.putNumber("kP", climbMotor.configAccessor.closedLoop.getP());
+        SmartDashboard.putNumber("climbPos", climb.getPosition().getValueAsDouble());
     }
 
     public void setClimbPower(double speed) {
-        climbMotor.set(speed);
+        climb.set(speed);
     }
 
     public void setClimbToPos(double pos) {
-        pidController.setReference(pos, ControlType.kPosition);
+        climb.setControl(new MotionMagicExpoVoltage(pos));
     }
+
+    //268.31 - out
+    //53 - climb in
 }

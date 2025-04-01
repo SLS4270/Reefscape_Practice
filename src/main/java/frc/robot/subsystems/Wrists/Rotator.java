@@ -26,14 +26,11 @@ public class Rotator extends SubsystemBase {
         rotatorMotor = new TalonFX(Constants.rotatorID);
         rotatorMotor.setNeutralMode(NeutralModeValue.Brake);
         rotationSensor = new DutyCycleEncoder(9);
-        // rotatorMotor.setPosition(0);
         rotatorMotor.getConfigurator().apply(config.MotionMagic
             .withMotionMagicCruiseVelocity(200)
-            .withMotionMagicExpo_kV(0.0001)
-            .withMotionMagicExpo_kA(0.0001));
+            .withMotionMagicExpo_kV(0.00001)
+            .withMotionMagicExpo_kA(0.00001));
         rotatorMotor.getConfigurator().apply(new Slot0Configs().withKP(35));
-        // rotatorMotor.setPosition(0);
-        // rotatorMotor.getConfigurator().apply(config.Feedback.withSensorToMechanismRatio(1));
         candi = new CANdi(59);
         rotatorMotor.getConfigurator().apply(new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANdiPWM1).withFeedbackRemoteSensorID(59));
         rotatorMotor.getConfigurator().apply(new CurrentLimitsConfigs()

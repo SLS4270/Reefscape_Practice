@@ -10,6 +10,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.SubsystemCommands.RunClimb;
+import frc.robot.commands.SubsystemCommands.RunIntakeWrist;
+import frc.robot.constants.Constants;
+import frc.robot.subsystems.LEDs.LEDStates;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -53,10 +57,20 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    
+  }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    Alliance allianceColor = DriverStation.getAlliance().get();
+
+    if (allianceColor.equals(Alliance.Red)) {
+      RobotContainer.s_LEDs.setLEDS(LEDStates.DisabledRed);
+    } else {
+      RobotContainer.s_LEDs.setLEDS(LEDStates.DisabledBlue);
+    }
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -82,11 +96,17 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    RobotContainer.s_LEDs.setLEDS(LEDStates.Default);
 
     alliance = DriverStation.getAlliance().get();
     SmartDashboard.putString("alliance", alliance.toString());
 
-    m_robotContainer.teleopTriggers();
+    m_robotContainer.teleopTriggersJake2();
+
+    // new RunClimb(RobotContainer.s_Climb, Constants.Jake2Setpoints.Climb.climbDefault).schedule();
+    // new RunIntakeWrist(RobotContainer.s_IntakeWrist, -7.7).schedule();
+
+    RobotContainer.drivetrain.tarePose();
     // SmartDashboard.putNumber("TareAngle", Autos.tareAngle);
     // RobotContainer.drivetrain.tareSwerve(Autos.tareAngle);
   }

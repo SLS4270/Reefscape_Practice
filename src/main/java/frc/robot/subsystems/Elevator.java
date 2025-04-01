@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -10,8 +11,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.States.StateCommands.CoralLevels;
 import frc.robot.constants.Constants;
+import frc.robot.constants.Constants.CoralLevels;
 
 public class Elevator extends SubsystemBase {
 
@@ -29,37 +30,35 @@ public class Elevator extends SubsystemBase {
         lElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
             .withMotionMagicCruiseVelocity(300)
             .withMotionMagicExpo_kV(0.0001)
-            .withMotionMagicExpo_kA(0.0001));
-        lElevator.getConfigurator().apply(new Slot0Configs().withKP(1).withGravityType(GravityTypeValue.Elevator_Static).withKG(0.1));
+            .withMotionMagicExpo_kA(0.00001));
+        lElevator.getConfigurator().apply(new Slot0Configs().withKP(1).withGravityType(GravityTypeValue.Elevator_Static).withKG(0.5));
+        lElevator.getConfigurator().apply(new CurrentLimitsConfigs()
+        .withStatorCurrentLimit(40)
+        .withStatorCurrentLimitEnable(true)
+        .withSupplyCurrentLimit(40)
+        .withSupplyCurrentLimitEnable(true));
 
         rElevator.setNeutralMode(NeutralModeValue.Brake);
         rElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
             .withMotionMagicCruiseVelocity(300)
             .withMotionMagicExpo_kV(0.0001)
-            .withMotionMagicExpo_kA(0.0001));
-        rElevator.getConfigurator().apply(new Slot0Configs().withKP(1).withGravityType(GravityTypeValue.Elevator_Static).withKG(0.1));
+            .withMotionMagicExpo_kA(0.00001));
+        rElevator.getConfigurator().apply(new Slot0Configs().withKP(1).withGravityType(GravityTypeValue.Elevator_Static).withKG(0.5));
         rElevator.getConfigurator().apply(new CurrentLimitsConfigs()
-        .withStatorCurrentLimit(60)
+        .withStatorCurrentLimit(40)
         .withStatorCurrentLimitEnable(true)
-        .withSupplyCurrentLimit(60)
+        .withSupplyCurrentLimit(40)
         .withSupplyCurrentLimitEnable(true));
         currentLevel = CoralLevels.L4;
         elevatorLevel = CoralLevels.L4;
+
+        lElevator.setControl(new Follower(Constants.elevatorID2, true));
     }
     
     public void runElevatorToPos(double lPos, double rPos) {
-        // lElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic.withMotionMagicCruiseVelocity(300));
-        // rElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic.withMotionMagicCruiseVelocity(300));
-        lElevator.setControl(new MotionMagicExpoVoltage(lPos).withEnableFOC(true));
         rElevator.setControl(new MotionMagicExpoVoltage(rPos).withEnableFOC(true));
+        // lElevator.setControl(new MotionMagicExpoVoltage(lPos).withEnableFOC(true));
     }
-
-    // public void runElevatorToPos(double lPos, double rPos, double maxVelo) {
-    //     lElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic.withMotionMagicCruiseVelocity(maxVelo));
-    //     rElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic.withMotionMagicCruiseVelocity(maxVelo));
-    //     lElevator.setControl(new MotionMagicExpoVoltage(lPos).withEnableFOC(true));
-    //     rElevator.setControl(new MotionMagicExpoVoltage(rPos).withEnableFOC(true));
-    // }
 
     @Override
     public void periodic() {

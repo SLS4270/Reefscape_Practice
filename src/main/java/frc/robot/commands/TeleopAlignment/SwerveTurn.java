@@ -25,7 +25,6 @@ public class SwerveTurn extends SequentialCommandGroup{
 
         double xKP = 4.25;
         double yKP = 4.25;
-        // double driveRadius = 0.343;
         double driveRadius = 0.41;
         if (side == Side.Right) {
             addCommands(
