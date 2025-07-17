@@ -10,18 +10,17 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Constants;
 
-public class Intake extends SubsystemBase {
+public class L1Intake extends SubsystemBase {
     TalonFX intake;
 
-    public Intake() {
-        intake = new TalonFX(Constants.intakeID);
-        intake.getConfigurator()
-        .apply(new CurrentLimitsConfigs()
+    public L1Intake() {
+        intake = new TalonFX(Constants.l1IntakeID);
+        intake.getConfigurator().apply(new CurrentLimitsConfigs()
         .withStatorCurrentLimit(60)
         .withStatorCurrentLimitEnable(true)
         .withSupplyCurrentLimit(60)
         .withSupplyCurrentLimitEnable(true));
-        intake.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+        intake.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
         intake.setNeutralMode(NeutralModeValue.Brake);
     }
 

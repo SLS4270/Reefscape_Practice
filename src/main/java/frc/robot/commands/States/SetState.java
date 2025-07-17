@@ -26,20 +26,15 @@ public class SetState extends SequentialCommandGroup {
         AlgaeLow,
         BargeScore,
         Processor,
-        GroundAlgae,
-        ScoreGroundAlgae,
-        GroundAlgaeIntake,
         BackwardBarge,
         IntakeL1,
         SmartScoreL1,
         SmartScoreL2,
         SmartScoreL3,
         SmartScoreL4,
-        BallReturn,
         PrepThrow,
         ThrowAlgae,
-        TransferBall,
-        BallIdle
+        IndexingAuto
     }
 
     public SetState (States state) {
@@ -150,21 +145,6 @@ public class SetState extends SequentialCommandGroup {
                     StateCommands.processorState()
                 );
                 break;
-            case GroundAlgae:
-                addCommands(
-                    StateCommands.algaeGround()
-                );
-                break;
-            case ScoreGroundAlgae:
-                addCommands(
-                    StateCommands.releaseAlgaeGround()
-                );
-                break;
-            case GroundAlgaeIntake:
-                addCommands(
-                    StateCommands.intakeGroundAlgae()
-                );
-                break;
             case BackwardBarge:
                 addCommands(
                     StateCommands.backwardBargeState()
@@ -190,11 +170,6 @@ public class SetState extends SequentialCommandGroup {
                     StateCommands.smartScoringState(CoralLevels.L4)
                 );
                 break;
-            case BallReturn:
-                addCommands(
-                    StateCommands.ballDefaultState()
-                );
-                break;
             case ThrowAlgae:
                 addCommands(
                     StateCommands.throwAlgae()
@@ -205,14 +180,9 @@ public class SetState extends SequentialCommandGroup {
                     StateCommands.prepAlgaeThrow()
                 );
                 break;
-            case TransferBall:
+            case IndexingAuto:
                 addCommands(
-                    StateCommands.transferBall()
-                );
-                break;
-            case BallIdle:
-                addCommands(
-                    StateCommands.groundBallDefaultState()
+                    StateCommands.indexingStateAuto()
                 );
                 break;
         }

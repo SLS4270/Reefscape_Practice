@@ -43,8 +43,4 @@ public class IntakeWrist extends SubsystemBase{
     public double getLPos() {
         return wristIntake1.getPosition().getValueAsDouble();
     }
-
-    //stow: L: -3.3 R: 3.8
-    //intake L: -31.8 R: 32.5
-    //-22.77
 }

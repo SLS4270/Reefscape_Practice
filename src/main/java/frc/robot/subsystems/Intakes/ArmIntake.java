@@ -2,6 +2,7 @@ package frc.robot.subsystems.Intakes;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.ProximityParamsConfigs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -34,11 +35,11 @@ public class ArmIntake extends SubsystemBase{
         armIntake = new TalonFX(Constants.armIntakeID);
         armIntake.setNeutralMode(NeutralModeValue.Brake);
         armIntake.getConfigurator().apply(new CurrentLimitsConfigs()
-        .withStatorCurrentLimit(40)
+        .withStatorCurrentLimit(50)
         .withStatorCurrentLimitEnable(true)
-        .withSupplyCurrentLimit(40)
+        .withSupplyCurrentLimit(50)
         .withSupplyCurrentLimitEnable(true));
-        rangeFinder = new CANrange(40);
+        rangeFinder = new CANrange(47);
         rangeFinder.getConfigurator().apply(new ProximityParamsConfigs()
         .withProximityThreshold(0.08)
         .withMinSignalStrengthForValidMeasurement(0.02)
@@ -49,7 +50,7 @@ public class ArmIntake extends SubsystemBase{
     }
 
     public void spinArmIntake(double power) {
-        armIntake.set(power);
+        armIntake.setControl(new DutyCycleOut(power).withEnableFOC(true));
     }
 
     @Override
@@ -60,7 +61,7 @@ public class ArmIntake extends SubsystemBase{
         coralIntakeState = getCoralIntakeState();
         publicBallIntakeState = getBallIntakeState();
         SmartDashboard.putBoolean("ObjectInClaw", objectInClaw);
-        // SmartDashboard.putString("isCoralIntaking", coralIntakeState.toString());
+        SmartDashboard.putBoolean("isCoralIntaking", coralIntakeState == CoralIntakeState.CoralIntaking);
     }
 
     public static void setCoralIntakeState(CoralIntakeState state) {

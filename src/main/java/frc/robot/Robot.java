@@ -7,11 +7,9 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.SubsystemCommands.RunClimb;
-import frc.robot.commands.SubsystemCommands.RunIntakeWrist;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.LEDs.LEDStates;
 
@@ -41,7 +39,7 @@ public class Robot extends TimedRobot {
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
-   * that you want ran during disabled, autonomous, teleoperated and test.
+   * that you want ran during disabled, autonomous, Teleoperated and test.
    *
    * <p>This runs after the mode specific periodic functions, but before LiveWindow and
    * SmartDashboard integrated updating.
@@ -90,20 +88,19 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
+    // Teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    m_robotContainer.teleopTriggers();
+
     RobotContainer.s_LEDs.setLEDS(LEDStates.Default);
 
     alliance = DriverStation.getAlliance().get();
-    SmartDashboard.putString("alliance", alliance.toString());
 
-    m_robotContainer.teleopTriggersJake2();
-
-    // new RunClimb(RobotContainer.s_Climb, Constants.Jake2Setpoints.Climb.climbDefault).schedule();
+    new RunClimb(RobotContainer.s_Climb, Constants.Setpoints.Climb.climbDefault).schedule();
     // new RunIntakeWrist(RobotContainer.s_IntakeWrist, -7.7).schedule();
 
     RobotContainer.drivetrain.tarePose();

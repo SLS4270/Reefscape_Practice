@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.424835227272726,
-        "y": 3.9601846590909093
+        "x": 6.611164772727273,
+        "y": 4.149644886363635
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.8476420454545455,
-        "y": 4.947372159090909
+        "x": 7.189517045454545,
+        "y": 4.508622159090908
       },
       "prevControl": {
-        "x": 7.359034090909091,
-        "y": 4.269303977272727
+        "x": 6.421704545454546,
+        "y": 4.119730113636363
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,31 +33,20 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "BargePrep1",
+      "name": "ThrowPrep",
       "waypointRelativePos": 0.16422947131608281,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
         "data": {
-          "name": "BargePrep"
-        }
-      }
-    },
-    {
-      "name": "BargeScore1",
-      "waypointRelativePos": 0.9021372328458902,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Outtake"
+          "name": "ThrowPrep"
         }
       }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 4.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -65,7 +54,7 @@
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": 180.0
+    "rotation": -150.0
   },
   "reversed": false,
   "folder": "CoralBall",
@@ -73,5 +62,5 @@
     "velocity": 0,
     "rotation": 180.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

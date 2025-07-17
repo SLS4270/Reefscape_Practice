@@ -17,14 +17,14 @@ import frc.robot.constants.Constants.CoralLevels;
 public class Elevator extends SubsystemBase {
 
     private static CoralLevels currentLevel;
-    public static CoralLevels elevatorLevel;
+    public static CoralLevels rElevatorLevel;
 
     TalonFX lElevator;
     TalonFX rElevator;
 
     public Elevator() {
-        lElevator = new TalonFX(Constants.elevatorID1);
-        rElevator = new TalonFX(Constants.elevatorID2);
+        lElevator = new TalonFX(Constants.rElevatorID1);
+        rElevator = new TalonFX(Constants.rElevatorID2);
 
         lElevator.setNeutralMode(NeutralModeValue.Brake);
         lElevator.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
@@ -50,14 +50,13 @@ public class Elevator extends SubsystemBase {
         .withSupplyCurrentLimit(40)
         .withSupplyCurrentLimitEnable(true));
         currentLevel = CoralLevels.L4;
-        elevatorLevel = CoralLevels.L4;
+        rElevatorLevel = CoralLevels.L4;
 
-        lElevator.setControl(new Follower(Constants.elevatorID2, true));
+        lElevator.setControl(new Follower(Constants.rElevatorID2, true));
     }
     
-    public void runElevatorToPos(double lPos, double rPos) {
+    public void runElevatorToPos(double rPos) {
         rElevator.setControl(new MotionMagicExpoVoltage(rPos).withEnableFOC(true));
-        // lElevator.setControl(new MotionMagicExpoVoltage(lPos).withEnableFOC(true));
     }
 
     @Override
@@ -66,8 +65,8 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putNumber("lPosition", lElevator.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("rPosition", rElevator.getPosition().getValueAsDouble());
         SmartDashboard.putString("Current Level", getCurrentLevel().toString());
-        elevatorLevel = getCurrentLevel();
-        SmartDashboard.putString("eleLevel", elevatorLevel.toString());
+        rElevatorLevel = getCurrentLevel();
+        SmartDashboard.putString("rEleLevel", rElevatorLevel.toString());
     }
 
     public static void setCurrentLevel(CoralLevels level) {

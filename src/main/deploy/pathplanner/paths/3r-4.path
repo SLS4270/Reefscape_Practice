@@ -49,11 +49,11 @@
     {
       "anchor": {
         "x": 3.31,
-        "y": 3.8518092105263158
+        "y": 3.9
       },
       "prevControl": {
         "x": 2.7710526315789474,
-        "y": 3.880674342105263
+        "y": 3.9288651315789473
       },
       "nextControl": null,
       "isLocked": false,
@@ -88,13 +88,13 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "score coral",
+      "name": "Slam4",
       "waypointRelativePos": 0.0,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
         "data": {
-          "name": "ScoreL4"
+          "name": "Slam4"
         }
       }
     },
@@ -111,7 +111,7 @@
     },
     {
       "name": "index coral",
-      "waypointRelativePos": 1.95,
+      "waypointRelativePos": 2.0,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",

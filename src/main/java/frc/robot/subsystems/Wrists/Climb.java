@@ -1,6 +1,5 @@
 package frc.robot.subsystems.Wrists;
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -13,20 +12,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Constants;
 
-public class Climb extends SubsystemBase{
+public class Climb extends SubsystemBase {
 
     TalonFX climb;
 
     public Climb() {
         climb = new TalonFX(Constants.climbID);
 
-        climb.setNeutralMode(NeutralModeValue.Brake);
         climb.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
             .withMotionMagicCruiseVelocity(200)
             .withMotionMagicExpo_kV(0.00001)
             .withMotionMagicExpo_kA(0.00001));
-            climb.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
+
+        climb.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
         climb.getConfigurator().apply(new Slot0Configs().withKP(1));
+        climb.setNeutralMode(NeutralModeValue.Brake);
     }
 
     @Override
@@ -41,7 +41,4 @@ public class Climb extends SubsystemBase{
     public void setClimbToPos(double pos) {
         climb.setControl(new MotionMagicExpoVoltage(pos));
     }
-
-    //268.31 - out
-    //53 - climb in
 }

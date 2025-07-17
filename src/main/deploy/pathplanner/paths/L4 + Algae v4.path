@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.848,
-        "y": 4.947
+        "x": 7.19,
+        "y": 4.509
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.591221590909091,
-        "y": 5.475866477272728
+        "x": 5.8134375,
+        "y": 5.555639204545454
       },
       "isLocked": false,
       "linkedName": null
@@ -67,7 +67,7 @@
   "folder": "CoralBall",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -150.0
   },
   "useDefaultConstraints": false
 }

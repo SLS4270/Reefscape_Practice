@@ -7,6 +7,8 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -48,9 +50,6 @@ import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
  * Subsystem so it can easily be used in command-based projects.
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-    private static final double kSimLoopPeriod = 0.005; // 5 ms
-    private Notifier m_simNotifier = null;
-    private double m_lastSimTime;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -69,8 +68,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     StructPublisher<Pose2d> publisher;
     StructPublisher<Pose2d> publisher2;
-    StructPublisher<Pose2d> publisher3;
-    StructPublisher<Pose2d> publisher4;
 
     StructArrayPublisher<SwerveModuleState> swerveStates;
     StructPublisher<ChassisSpeeds> swerveSpeeds;
@@ -79,7 +76,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     Pose2d nearestTag;
     SwerveDrivePoseEstimator poseEstimator;
     public boolean hasTargets;
-    public double disNuts;
+    public double distance;
 
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -159,17 +156,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
         super(drivetrainConstants, modules);
-        if (Utils.isSimulation()) {
-            startSimThread();
-        }
         publisher = NetworkTableInstance.getDefault()
             .getStructTopic("MyPose", Pose2d.struct).publish();
         publisher2 = NetworkTableInstance.getDefault()
             .getStructTopic("nearestTag", Pose2d.struct).publish();
-        publisher3 = NetworkTableInstance.getDefault()
-            .getStructTopic("LL3A", Pose2d.struct).publish();
-        publisher4 = NetworkTableInstance.getDefault()
-            .getStructTopic("Phoneix Pose", Pose2d.struct).publish();
 
         swerveStates = NetworkTableInstance.getDefault().getStructArrayTopic("states", SwerveModuleState.struct).publish();
         swerveSpeeds = NetworkTableInstance.getDefault().getStructTopic("speeds", ChassisSpeeds.struct).publish();
@@ -177,21 +167,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.seedFieldCentric();
         LimelightHelpers.setCameraPose_RobotSpace("limelight-front", 0.234, 0.02, 0.254, 0, 0, 21.45);
         LimelightHelpers.setCameraPose_RobotSpace("limelight", 0.234, -0.02, 0.254, 0, 0, -21.45);
-        LimelightHelpers.setCameraPose_RobotSpace("limelight-climb", -0.19, 0.267, 1.02, 180, -45, 155);
         poseEstimator = new SwerveDrivePoseEstimator(
             getKinematics(), 
             this.getPigeon2().getRotation2d(),
-            // Rotation2d.fromDegrees(
-            //     DriverStation.getAlliance().get() == Alliance.Red ? 
-            //         this.getPigeon2().getRotation2d().getDegrees() - 90 : 
-            //         this.getPigeon2().getRotation2d().getDegrees() + 90), 
             this.getState().ModulePositions, 
             new Pose2d());
         angleToTurnTo = 0.0;
         pose = new Pose2d();
         nearestTag = new Pose2d();
-
-        Shuffleboard.getTab("SmartDashboard").addCamera("LLclimb", "limelight-climber", "ip:http://10.42.70.100:5800/?action=stream");
     }
 
     /**
@@ -213,9 +196,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
         super(drivetrainConstants, odometryUpdateFrequency, modules);
-        if (Utils.isSimulation()) {
-            startSimThread();
-        }
     }
 
     /**
@@ -245,11 +225,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
         super(drivetrainConstants, odometryUpdateFrequency, odometryStandardDeviation, visionStandardDeviation, modules);
-        if (Utils.isSimulation()) {
-            startSimThread();
-        }
-
-
     }
 
     /**
@@ -310,8 +285,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             hasTargets = false;
         }
         angleToTurnTo = findClosestApriltag(Constants.allApriltagPoses).getRotation().getDegrees() - 180;
-        // angleToTurnTo = (findClosestApriltag(Constants.apriltagPosesXYBlueCoral).getRotation().getDegrees() + 180.0) % 180;
-
 
         SmartDashboard.putNumber("turnToWhatAngle", angleToTurnTo);
         SmartDashboard.putNumber("currentAngle", this.getPigeon2().getRotation2d().getDegrees());
@@ -319,14 +292,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         updateOdometry();
         pose = poseEstimator.getEstimatedPosition();
         nearestTag = findClosestApriltag(Constants.allApriltagPoses);
-        disNuts = poseEstimator.getEstimatedPosition().getTranslation().getDistance(findClosestApriltag(Constants.allApriltagPoses).getTranslation());
+        distance = poseEstimator.getEstimatedPosition().getTranslation().getDistance(findClosestApriltag(Constants.allApriltagPoses).getTranslation());
         SmartDashboard.putNumber("distanceToTag", distanceToTag());
 
-        // pose = new Pose2d(this.getState().Pose.getTranslation(), this.getState().Pose.getRotation());
         publisher.set(pose);
         publisher2.set(findClosestApriltag(Constants.allApriltagPoses));
-        publisher3.set(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-climb").pose);
-        publisher4.set(this.getState().Pose);
 
         swerveStates.set(this.getState().ModuleStates);
         swerveSpeeds.set(this.getState().Speeds);
@@ -337,7 +307,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         poseEstimator.update(this.getPigeon2().getRotation2d(), this.getState().ModulePositions);
         LimelightHelpers.SetRobotOrientation("limelight-front", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
         LimelightHelpers.SetRobotOrientation("limelight", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        LimelightHelpers.SetRobotOrientation("limelight-climb", poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
         if (this.getPigeon2().getAngularVelocityZWorld().getValueAsDouble() < 720 && LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").tagCount > 0) {
             poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.8, 0.8, 9999999));
             poseEstimator.addVisionMeasurement(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front").pose, 
@@ -356,21 +325,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         } 
     }
 
-    private void startSimThread() {
-        m_lastSimTime = Utils.getCurrentTimeSeconds();
-
-        /* Run simulation at a faster rate so PID gains behave more reasonably */
-        m_simNotifier = new Notifier(() -> {
-            final double currentTime = Utils.getCurrentTimeSeconds();
-            double deltaTime = currentTime - m_lastSimTime;
-            m_lastSimTime = currentTime;
-
-            /* use the measured time delta, get battery voltage from WPILib */
-            updateSimState(deltaTime, RobotController.getBatteryVoltage());
-        });
-        m_simNotifier.startPeriodic(kSimLoopPeriod);
-    }
-
     public void configPathPlanner() {
         RobotConfig config;
         try {
@@ -385,8 +339,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
                     ), 
                 new PPHolonomicDriveController(
-                    new PIDConstants(3.5, 0, 0),
-                    new PIDConstants(3.5, 0, 0)
+                    new PIDConstants(3.52, 0, 0),
+                    new PIDConstants(3.52, 0, 0)
                 ), 
                 config, 
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red, 
@@ -447,7 +401,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public double distanceToTag() {
-        return disNuts;
+        return distance;
     }
 
     public void resetOdom(Pose2d pose) {

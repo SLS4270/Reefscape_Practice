@@ -41,17 +41,8 @@ public class Rotator extends SubsystemBase {
     }
 
     public void runRotatorToPos(double pos, double maxVelo) {
-        // if (pos == 24) {
-            rotatorMotor.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
+        rotatorMotor.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
             .withMotionMagicCruiseVelocity(maxVelo));
-        //     .withMotionMagicExpo_kV(0.05)
-        //     .withMotionMagicExpo_kA(0.01));
-        // } else {
-        //     rotatorMotor.getConfigurator().apply(new TalonFXConfiguration().MotionMagic
-        //     .withMotionMagicCruiseVelocity(150)
-        //     .withMotionMagicExpo_kV(0.005)
-        //     .withMotionMagicExpo_kA(0.005));
-        // }
         rotatorMotor.setControl(new MotionMagicExpoVoltage(pos).withEnableFOC(true));
     }
 
@@ -60,23 +51,8 @@ public class Rotator extends SubsystemBase {
         SmartDashboard.putNumber("pivotPos", rotatorMotor.getPosition().getValueAsDouble()); 
         SmartDashboard.putNumber("absEncoder", rotationSensor.get());
         SmartDashboard.putNumber("candiPosition", candi.getPWM1Position().getValueAsDouble());
-
-        // if (rotationSensor.get() == 0.35) {
-        //     rotatorMotor.setPosition(0);
-        // }
-        SmartDashboard.putNumber("absDeg", absRotationsToDeg(rotationSensor.get()));
-        SmartDashboard.putNumber("absDegToInternalENc", degToInternalRotations(absRotationsToDeg(rotationSensor.get())));
-    }
-    //up: 26
-    //down: 0
-
-    public double absRotationsToDeg(double rot) {
-        return rot * 360 - 126;
     }
 
-    public double degToInternalRotations(double deg) {
-        return deg * 0.14;
-    }
     
     public double getPos() {
         return rotatorMotor.getPosition().getValueAsDouble();

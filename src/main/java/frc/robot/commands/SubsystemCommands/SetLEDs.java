@@ -16,7 +16,7 @@ public class SetLEDs extends Command {
     }
     
     @Override
-    public void execute() {
+    public void initialize() {
         s_LEDs.setLEDS(state);
     }
 }

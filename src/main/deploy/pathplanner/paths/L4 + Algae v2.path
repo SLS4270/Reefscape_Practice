@@ -61,12 +61,6 @@
               "data": {
                 "name": "A1 Prep"
               }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "AlgaeIntake"
-              }
             }
           ]
         }
